@@ -6,10 +6,17 @@ import { Box } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
-const RootStyle = styled('div')(() => ({
+const RootStyle = styled('div')(({ theme }) => ({
   flexGrow: 1,
   height: '100%',
-  overflow: 'scroll',
+  overflowY: 'scroll',
+  '::-webkit-scrollbar' : {
+    width: '10px',
+    display: 'none'
+  },
+  '::-webkit-scrollbar-track' : {
+    background: alpha(theme.palette.grey[600], 0.48)
+  }
 }));
 
 const SimpleBarStyle = styled(SimpleBarReact)(({ theme }) => ({
