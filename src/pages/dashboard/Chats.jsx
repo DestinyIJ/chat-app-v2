@@ -3,36 +3,9 @@ import { styled, alpha, useTheme } from "@mui/material/styles"
 import { CircleDashed, MagnifyingGlass, ArchiveBox } from "phosphor-react";
 
 
+import { StyledBadge } from "../../components";
 import { ChatList } from "../../data";
 
-const StyledBadge = styled(Badge)(({ theme }) => ({
-    '& .MuiBadge-badge': {
-      backgroundColor: '#44b700',
-      color: '#44b700',
-      boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-      '&::after': {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        borderRadius: '50%',
-        animation: 'ripple 1.2s infinite ease-in-out',
-        border: '1px solid currentColor',
-        content: '""',
-      },
-    },
-    '@keyframes ripple': {
-      '0%': {
-        transform: 'scale(.8)',
-        opacity: 1,
-      },
-      '100%': {
-        transform: 'scale(2.4)',
-        opacity: 0,
-      },
-    },
-  }));
 
 
 const ChatElement = ({id, img, name, msg, time, unread, online,}) => {
@@ -46,15 +19,17 @@ const ChatElement = ({id, img, name, msg, time, unread, online,}) => {
         >
             <Stack direction="row" alignItems="center" justifyContent="space-between">
                 <Stack direction="row" spacing={2}>
-                    { online ? 
-                        <StyledBadge overlap="circular" anchorOrigin={{ vertical: "bottom", horizontal: "right" }} variant="dot">
-                            <Avatar src={img} />
-                        </StyledBadge>
-                        : <Avatar src={img} />
-                    }
+                    <Box>
+                        { online ? 
+                            <StyledBadge overlap="circular" anchorOrigin={{ vertical: "bottom", horizontal: "right" }} variant="dot">
+                                <Avatar src={img} />
+                            </StyledBadge>
+                            : <Avatar src={img} />
+                        }
+                    </Box>
                     <Stack spacing={0.3}>
-                        <Typography variant="subtitle2">{name}</Typography>
-                        <Typography variant="caption">{msg.length > 16 ? `${msg.substring(0, 16)}...` : msg}</Typography>
+                        <Typography sx={{  wordWrap: "break-word" }} variant="subtitle2">{name}</Typography>
+                        <Typography variant="caption" noWrap={true}>{msg}</Typography>
                     </Stack>
                 </Stack>
                 <Stack spacing={2} alignItems="center">
@@ -142,7 +117,7 @@ const Chats = () => {
                     sx={{
                         flexGrow: 1,
                         height: '100%',
-                        overflowY: 'scroll',
+                        overflow: 'scroll',
                         '::-webkit-scrollbar' : { display: 'none'}
                     }}
                 >

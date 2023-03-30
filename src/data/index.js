@@ -166,7 +166,7 @@ const Chat_History = [
     type: "msg",
     subtype: "img",
     message: "Here You Go",
-    img: faker.image.abstract(),
+    image: faker.image.abstract(),
     incoming: true,
     outgoing: false,
   },
