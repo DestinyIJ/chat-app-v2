@@ -1,7 +1,11 @@
-import React from 'react'
-import { Stack, Divider, Typography, Box, Card, CardContent, Link, CardMedia, CardActionArea, IconButton } from '@mui/material'
+import React, { useState } from 'react'
+import { Stack, Divider, Typography, Box, Card, CardContent, Link, CardMedia, CardActionArea, IconButton, Menu, MenuItem } from '@mui/material'
 import { useTheme } from "@mui/material/styles"
-import { DownloadSimple, Image } from 'phosphor-react'
+import { DownloadSimple, Image, DotsThreeVertical } from 'phosphor-react'
+import { Message_options } from '../../data'
+
+
+
 
 export const TimeLine = ({ chat }) => {
     const theme = useTheme()
@@ -15,11 +19,50 @@ export const TimeLine = ({ chat }) => {
     )
 }
 
+const MessageOption = ({ incoming }) => {
+    const [menuOpen, setMenuOpen] = useState(false)
+    const [anchorEl, setAnchorEl] = useState(null)
+
+    const handleClick = (e) => {
+        setMenuOpen(prev => !prev)
+        setAnchorEl(e.currentTarget)
+    }
+
+    const handleClose = () => {
+        setAnchorEl(null)
+        setMenuOpen(false)
+    }
+    const onClickOption = (option) => {
+        console.log(option)
+    } 
+    return (
+       <>
+        <DotsThreeVertical id='togggleMsgOpts' size={20} onClick={handleClick} />
+        <Menu
+            id='messageOptions'
+            anchorEl={anchorEl}
+            open={menuOpen}
+            onClose={handleClose}
+            MenuListProps={{
+                'aria-labelledby': 'togggleMsgOpts'
+            }}
+        >
+            {
+                Message_options.map((option, index) => {
+                    if(option.action === "report" && !incoming) return null
+                    return <MenuItem key={index} onClick={() => onClickOption(option.action)}>{option.title}</MenuItem>
+                })
+            }
+        </Menu>
+       </>
+    )
+}
+
 export const TextMsg = ({ chat: { incoming, message, image, video, audio, reply, preview, subtype } }) => {
     const theme = useTheme()
 
     return (
-      <Stack direction="row" justifyContent={incoming ? "start" : "end"}>
+      <Stack direction={incoming ? "row" : "row-reverse"} justifyContent={incoming ? "start" : "end"}>
         <Card sx={{ 
             maxWidth: 345,
             gap: 1,
@@ -53,23 +96,23 @@ export const TextMsg = ({ chat: { incoming, message, image, video, audio, reply,
                         </CardMedia>
 
                         <Stack spacing={2}>
-                        <Stack p={2} spacing={3} alingItems="start"
-                            sx={{
-                                backgroundColor: theme.palette.background.paper,
-                                borderRadius: 1  
-                            }}
-                        >
-                            <Stack sapcing={2}>
-                                <Typography variant='subtitle2'>Create New App</Typography>
-                                <Typography variant='subtitle2' 
-                                    sx={{ color: theme.palette.primary.main }} 
-                                    component={Link}  to="//https://www.youtube.com"
-                                >
-                                    www.fvkyou.com
-                                </Typography>
+                            <Stack p={2} spacing={3}
+                                sx={{
+                                    backgroundColor: theme.palette.background.paper,
+                                    borderRadius: 1  
+                                }}
+                            >
+                                <Stack spacing={2}>
+                                    <Typography variant='subtitle2'>Create New App</Typography>
+                                    <Typography variant='subtitle2' 
+                                        sx={{ color: theme.palette.primary.main }} 
+                                        component={Link}  to="//https://www.youtube.com"
+                                    >
+                                        www.youtube.com
+                                    </Typography>
+                                </Stack>
+                                <Typography variant="body2" sx={{  wordWrap: "break-word" }} color={incoming ? theme.palette.text : "#fff"}>{message}</Typography>
                             </Stack>
-                            <Typography variant="body2" sx={{  wordWrap: "break-word" }} color={incoming ? theme.palette.text : "#fff"}>{message}</Typography>
-                        </Stack>
                         </Stack>
                     </CardActionArea>
             }
@@ -104,14 +147,10 @@ export const TextMsg = ({ chat: { incoming, message, image, video, audio, reply,
                     <Typography variant="body2" sx={{  wordWrap: "break-word" }} color={incoming ? theme.palette.text : "#fff"}>{reply ? reply : message}</Typography>
                 </CardContent>
             }
-            </Card>
+        </Card>
+        <MessageOption incoming={incoming} />
       </Stack>
     )
 }
 
-export const Reply = () => {
-    return (
-      <div>MessageType</div>
-    )
-  }
 

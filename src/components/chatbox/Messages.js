@@ -9,12 +9,12 @@ const Messages = () => {
     <Box p={3}>
       <Stack spacing={3}>
         {
-          Chat_History.map((chat) => {
+          Chat_History.map((chat, index) => {
             switch (chat.type) {
               case "divider":
-                return <TimeLine chat={chat} />
+                return <TimeLine chat={chat} key={index} />
               case "msg":
-                return <TextMsg chat={chat} />
+                return <TextMsg chat={chat} key={index} />
               default:
                 return <></>
             }

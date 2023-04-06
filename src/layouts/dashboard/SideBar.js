@@ -4,11 +4,11 @@ import React, { useState } from "react";
 import { faker } from "@faker-js/faker";
 
 // Material-UI
-import { Box, Stack, IconButton, Divider, Avatar } from "@mui/material";
+import { Box, Stack, IconButton, Divider, Avatar, MenuItem, Menu } from "@mui/material";
 import { useTheme } from "@mui/material/styles"
 
 // Icons
-import { Gear } from "phosphor-react";
+import { DotsThreeVertical, Gear } from "phosphor-react";
 
 // Assets
 import Logo from '../../assets/Images/logo.ico'
@@ -22,6 +22,58 @@ import { AntSwitch } from "../../components";
 // utils 
 import { useSettings } from "../../hooks";
 
+// data
+import { Profile_Menu } from "../../data";
+
+const ProfileMenu = ({ incoming }) => {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [anchorEl, setAnchorEl] = useState(null)
+
+  const handleClick = (e) => {
+      setMenuOpen(prev => !prev)
+      setAnchorEl(e.currentTarget)
+  }
+
+  const handleClose = () => {
+      setAnchorEl(null)
+      setMenuOpen(false)
+  }
+  const onClickOption = (option) => {
+      console.log(option)
+  } 
+  return (
+     <>
+      <Avatar src={faker.image.avatar()} id='togggleMenuOpts' size={20} onClick={handleClick} />
+      
+      <Menu
+          id='messageOptions'
+          anchorEl={anchorEl}
+          open={menuOpen}
+          onClose={handleClose}
+          MenuListProps={{
+              'aria-labelledby': 'togggleMenuOpts'
+          }}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: "right"
+          }}
+      >
+          {
+            Profile_Menu.map((option, index) => {
+                  if(option.action === "report" && !incoming) return null
+                  return (
+                    <MenuItem key={index} onClick={() => onClickOption(option.action)}>
+                      <Stack width={100} direction="row" alignItems={"center"} justifyContent="space-between">
+                        <span>{option.title}</span>
+                        {option.icon}
+                      </Stack>
+                    </MenuItem>)
+              })
+          }
+      </Menu>
+     </>
+  )
+}
 
 const SideBar = () => {
   const theme = useTheme()
@@ -129,7 +181,7 @@ const SideBar = () => {
               <AntSwitch onChange={onToggleMode} defaultChecked inputProps={{ 'aria-label': 'ant design' }} />
             </Stack>
             {/* Avatar */}
-            <Avatar src={faker.image.avatar()} />
+            <ProfileMenu />
           </Stack>
         </Stack>
       </Box>

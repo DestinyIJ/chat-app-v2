@@ -29,7 +29,7 @@ const ChatElement = ({id, img, name, msg, time, unread, online,}) => {
                     </Box>
                     <Stack spacing={0.3}>
                         <Typography sx={{  wordWrap: "break-word" }} variant="subtitle2">{name}</Typography>
-                        <Typography variant="caption" noWrap={true}>{msg}</Typography>
+                        <Typography variant="caption" noWrap={true}>{msg.length > 12 ? msg.substring(0,12) + '...' : msg}</Typography>
                     </Stack>
                 </Stack>
                 <Stack spacing={2} alignItems="center">
