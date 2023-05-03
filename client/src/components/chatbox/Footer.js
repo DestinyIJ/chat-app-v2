@@ -1,4 +1,3 @@
-import { createPortal } from "react-dom";
 import { Box, Stack, IconButton, TextField, InputAdornment, Fab, Tooltip } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles"
 import {  Camera, File, Image, LinkSimple, PaperPlaneTilt, Smiley, Sticker, User } from 'phosphor-react';

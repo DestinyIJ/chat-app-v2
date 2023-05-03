@@ -58,7 +58,7 @@ const MessageOption = ({ incoming }) => {
     )
 }
 
-export const TextMsg = ({ chat: { incoming, message, image, video, audio, reply, preview, subtype } }) => {
+export const TextMsg = ({ chat: { incoming, message, image, video, audio, reply, preview, subtype }, menu = true }) => {
     const theme = useTheme()
 
     return (
@@ -95,22 +95,25 @@ export const TextMsg = ({ chat: { incoming, message, image, video, audio, reply,
                             
                         </CardMedia>
 
-                        <Stack spacing={2}>
-                            <Stack p={2} spacing={3}
+                        <Stack spacing={1}>
+                            <Stack p={1} spacing={3}
                                 sx={{
                                     backgroundColor: theme.palette.background.paper,
                                     borderRadius: 1  
                                 }}
                             >
-                                <Stack spacing={2}>
-                                    <Typography variant='subtitle2'>Create New App</Typography>
-                                    <Typography variant='subtitle2' 
-                                        sx={{ color: theme.palette.primary.main }} 
-                                        component={Link}  to="//https://www.youtube.com"
-                                    >
-                                        www.youtube.com
-                                    </Typography>
-                                </Stack>
+                                {
+                                    subtype === "link" &&
+                                    <Stack spacing={2}>
+                                        <Typography variant='subtitle2'>Create New App</Typography>
+                                        <Typography variant='subtitle2' 
+                                            sx={{ color: theme.palette.primary.main }} 
+                                            component={Link}  to="//https://www.youtube.com"
+                                        >
+                                            www.youtube.com
+                                        </Typography>
+                                    </Stack>
+                                }
                                 <Typography variant="body2" sx={{  wordWrap: "break-word" }} color={incoming ? theme.palette.text : "#fff"}>{message}</Typography>
                             </Stack>
                         </Stack>
@@ -148,9 +151,11 @@ export const TextMsg = ({ chat: { incoming, message, image, video, audio, reply,
                 </CardContent>
             }
         </Card>
-        <MessageOption incoming={incoming} />
+        {menu && <MessageOption incoming={incoming} />}
       </Stack>
     )
 }
+
+
 
 

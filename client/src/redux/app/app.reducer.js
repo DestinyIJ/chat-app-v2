@@ -3,7 +3,7 @@ import appActionTypes from "./app.types";
 const INITIAL_STATE = {
     sidebar: {
         open: false,
-        type: "CONTACT"
+        type: appActionTypes.SIDEBAR_TYPES.CONTACT
     }
 }
 
@@ -15,7 +15,8 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 sidebar: {
                     ...state.sidebar,
-                    open: !state.sidebar.open
+                    open: !state.sidebar.open,
+                    type: appActionTypes.SIDEBAR_TYPES.CONTACT
                 }
             }
         case appActionTypes.UPDATE_SIDEBAR_TYPE:

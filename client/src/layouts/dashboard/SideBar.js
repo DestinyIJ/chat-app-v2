@@ -8,7 +8,7 @@ import { Box, Stack, IconButton, Divider, Avatar, MenuItem, Menu } from "@mui/ma
 import { useTheme } from "@mui/material/styles"
 
 // Icons
-import { DotsThreeVertical, Gear } from "phosphor-react";
+import { Gear } from "phosphor-react";
 
 // Assets
 import Logo from '../../assets/Images/logo.ico'

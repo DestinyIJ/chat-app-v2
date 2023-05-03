@@ -232,6 +232,67 @@ const Message_options = [
   },
 ];
 
+const SHARED_LINK = [
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.city(),
+    message: "Yes, you can",
+    incoming: true,
+    outgoing: false
+  },{
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.city(),
+    message: "Yes, you can",
+    incoming: true,
+    outgoing: false
+  },
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.city(),
+    message: "Yes, you can",
+    incoming: false,
+    outgoing: true
+  },
+  {
+    type: "msg",
+    subtype: "link",
+    preview: faker.image.city(),
+    message: "Yes, you can",
+    incoming: true,
+    outgoing: false
+  }
+]
+
+const SHARED_DOCS = [
+  {
+    type: "msg",
+    subtype: "doc",
+    preview: faker.image.nature(),
+    message: "Yes, I can",
+    incoming: true,
+    outgoing: false
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    preview: faker.image.animals(),
+    message: "Yes, I can",
+    incoming: true,
+    outgoing: false
+  },
+  {
+    type: "msg",
+    subtype: "doc",
+    preview: faker.image.abstract(),
+    message: "Yes, I can",
+    incoming: false,
+    outgoing: true
+  }
+]
+
 export {
   Profile_Menu,
   Nav_Setting,
@@ -239,4 +300,6 @@ export {
   ChatList,
   Chat_History,
   Message_options,
+  SHARED_LINK,
+  SHARED_DOCS,
 };

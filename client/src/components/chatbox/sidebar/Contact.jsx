@@ -1,23 +1,103 @@
 import React from 'react'
-import { Box, Stack, Typography, IconButton, Avatar, Divider, Button } from '@mui/material'
-import { useTheme } from "@mui/material/styles"
+import { Box, Stack, Typography, IconButton, Avatar, Divider, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Slide } from '@mui/material'
 
 import { Bell, CaretRight, Phone, Prohibit, Star, Trash, VideoCamera, X } from 'phosphor-react'
 
 import { useDispatch } from "react-redux";
-import { toggleSidebar } from '../../redux/app/app.action';
+import { toggleSidebar, updateSidebarType } from '../../../redux/app/app.action';
+import appActionTypes from '../../../redux/app/app.types';
 import { faker } from '@faker-js/faker';
-import AntSwitch from '../AntSwitch';
+import AntSwitch from '../../AntSwitch';
+import { useReducer } from 'react';
+
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction='up' ref={ref} {...props} />
+})
+const BlockDialog = ({ open, toggleDialog }) => {
+
+    return (
+        <Dialog
+            open={open}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => toggleDialog("BLOCK")}
+        >
+            <DialogTitle>Block this contact</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    Jeremiah will be blocked from your contact, are you sure?
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => toggleDialog("BLOCK")}>Cancel</Button>
+                <Button>Block</Button>
+            </DialogActions>
+
+        </Dialog>
+    )
+}
+
+const DeleteDialog = ({ open, toggleDialog }) => {
+
+    return (
+        <Dialog
+            open={open}
+            TransitionComponent={Transition}
+            keepMounted
+            onClose={() => toggleDialog("DELETE")}
+        >
+            <DialogTitle>Delete this contact</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    Jeremiah will be deleted from your Contact, are you sure?
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => toggleDialog("DELETE")}>Cancel</Button>
+                <Button>Block</Button>
+            </DialogActions>
+
+        </Dialog>
+    )
+}
+
+
+const INITIAL_DIALOG = {
+    block: false,
+    delete: false
+}
+
+const dialogreducer = (state, action) => {
+    switch (action.type) {
+      case "BLOCK":
+        return {
+            ...state,
+            block: !state.block,
+            delete: false
+        }
+    case "DELETE":
+        return {
+            ...state,
+            block: false,
+            delete: !state.delete
+        }
+      default:
+        return state;
+    }
+  };
 
 const Contact = () => {
-    const theme = useTheme()
     const dispatch = useDispatch()
+    const [dialog, dispatchDialog] = useReducer(dialogreducer, INITIAL_DIALOG)
+    
+    const toggleDialog = (action) => {
+        dispatchDialog({ type: action })
+    }
 
     return (
         <Box sx={{
             width: 320,
             height: "100vh",
-            backgroundColor: theme.palette.mode === "light" ? "#F8FAFF" : theme.palette.background,
             boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.45)",
         }}>
         <Stack sx={{ height: "100%"}}>
@@ -81,18 +161,24 @@ const Contact = () => {
 
                 <Stack direction="row" alignItems={"center"} justifyContent={"space-between"}>
                     <Typography variant="subtitle2">Media, Links &amp; Docs</Typography>
-                    <Button endIcon={<CaretRight />}>
+                    <Button endIcon={<CaretRight />} 
+                        onClick={
+                            () => {dispatch(
+                                    updateSidebarType(appActionTypes.SIDEBAR_TYPES.SHARED_MESSAGES)
+                                    )} 
+                        }
+                    >
                         25
                     </Button>
                 </Stack>
 
                 <Stack direction="row" spacing={2} alignItems={"center"}>
                     {
-                        [1,2,4].map((i) => {
+                        [1,2,4].map((i) => (
                             <Box key={i}>
                                 <img src={faker.image.fashion()} alt={faker.name.fullName()} />
                             </Box>
-                        })
+                        ))
                     }
                 </Stack>
                 <Divider />
@@ -103,7 +189,13 @@ const Contact = () => {
                         <Typography variant={"subtitle2"}>Starred Messages</Typography>
                     </Stack>
 
-                    <IconButton>
+                    <IconButton
+                        onClick={
+                            () => {dispatch(
+                                    updateSidebarType(appActionTypes.SIDEBAR_TYPES.STARRED_MESSAGES)
+                                    )} 
+                        }
+                    >
                         <CaretRight />
                     </IconButton>
                 </Stack>
@@ -129,15 +221,17 @@ const Contact = () => {
                 </Stack>
 
                 <Stack direction="row" spacing={2} alignItems={"center"}>
-                    <Button startIcon={<Prohibit />} fullWidth variant="outlined">
+                    <Button onClick={() => toggleDialog("BLOCK")} startIcon={<Prohibit />} fullWidth variant="outlined">
                         Block
                     </Button>
-                    <Button startIcon={<Trash />} fullWidth variant="outlined">
+                    <Button onClick={() => toggleDialog("DELETE")} startIcon={<Trash />} fullWidth variant="outlined">
                         Delete
                     </Button>
                 </Stack>
             </Stack>
         </Stack>
+        { dialog.block && <BlockDialog open={dialog.block} toggleDialog={toggleDialog} />}
+        { dialog.delete && <DeleteDialog open={dialog.delete} toggleDialog={toggleDialog} />}
         </Box>
     )
 }
