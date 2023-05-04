@@ -71,14 +71,12 @@ const dialogreducer = (state, action) => {
     switch (action.type) {
       case "BLOCK":
         return {
-            ...state,
-            block: !state.block,
-            delete: false
+            ...INITIAL_DIALOG,
+            block: !state.block
         }
     case "DELETE":
         return {
-            ...state,
-            block: false,
+            ...INITIAL_DIALOG,
             delete: !state.delete
         }
       default:

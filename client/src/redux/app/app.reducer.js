@@ -4,6 +4,10 @@ const INITIAL_STATE = {
     sidebar: {
         open: false,
         type: appActionTypes.SIDEBAR_TYPES.CONTACT
+    },
+    dialog: {
+        theme: false,
+        shortcut: false
     }
 }
 
