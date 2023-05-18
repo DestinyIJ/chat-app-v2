@@ -11,21 +11,27 @@ import { Eye, EyeSlash } from 'phosphor-react'
 import { Link as RouterLink } from 'react-router-dom'
 
 
-const LoginForm = () => {
+const RegisterForm = () => {
     const [showPassword, setShowPassword] = useState(false)
 
-    const LoginSchema = Yup.object().shape({
+    const RegisterSchema = Yup.object().shape({
+        userName: Yup.string().required("User Name is required"),
+        firstName: Yup.string().required("First Name is required"),
+        lastName: Yup.string().required("Last Name is required"),
         email: Yup.string().required("Email is required").email("This field requires valid Email address"),
-        password: Yup.string().required("Password is required")
+        password: Yup.string().min("Password must be at least 6 characters long").required("Password is required")
     })
 
     const defaultValues = {
+        userName: "",
+        firstName: "",
+        lastName: "",
         email: "",
         password: ""
     }
 
     const methods = useForm({
-        resolver: yupResolver(LoginSchema),
+        resolver: yupResolver(RegisterSchema),
         defaultValues
     })
 
@@ -50,10 +56,13 @@ const LoginForm = () => {
                     !!errors.afterSubmit &&
                     <Alert severity='error'>{errors.afterSubmit.message}</Alert>
                 }
-                <FormTextField 
-                    name="email" label="Email Address" 
-                    placeholder="Enter Email Address" 
-                />
+                <FormTextField name="userName" label="Username/Moniker" />
+                <Stack direction={{ xs: "column", sm:"row"}} spacing={3}>
+                    <FormTextField name="firstName" label="First Name" />
+                    <FormTextField name="lastName" label="Last Name" />
+                </Stack>
+                
+                <FormTextField name="email" label="Email Address" />
                 <FormTextField 
                     name="password" label="Password" 
                     type={showPassword ? "text" : "password"} 
@@ -69,11 +78,7 @@ const LoginForm = () => {
                     }}
                 />
             </Stack>
-            <Stack alignItems="flex-end" sx={{ my: 2 }}>
-                <Link to="/auth/forgot-password" component={RouterLink} variant="body2" color="inherit" underline="always">
-                    Forgot Password?
-                </Link>
-            </Stack>
+            
             <Button
                 fullWidth
                 color="inherit"
@@ -81,6 +86,7 @@ const LoginForm = () => {
                 type="submit"
                 variant='contained'
                 sx={{
+                    my: 2,
                     bgColor: "text.primary",
                     color: (theme) => theme.palette.mode === "light" ? "common.white" : "grey.800",
                     "&:hover":  {
@@ -89,11 +95,11 @@ const LoginForm = () => {
                     }
                 }}
             >
-                Login
+                SIGN UP 
             </Button>
             
         </FormProvider>
     )
 }
 
-export default LoginForm
+export default RegisterForm
