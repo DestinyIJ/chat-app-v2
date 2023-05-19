@@ -24,6 +24,9 @@ import { useSettings } from "../../hooks";
 
 // data
 import { Profile_Menu } from "../../data";
+import { useLocation, NavLink } from "react-router-dom";
+import { useEffect } from "react";
+import { useCallback } from "react";
 
 const ProfileMenu = ({ incoming }) => {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -80,9 +83,16 @@ const SideBar = () => {
   const { onToggleMode } = useSettings()
   const [selectedBtn, setSelectedBtn] = useState(0)
 
-  const onClickedIcon = (index) => {
-    setSelectedBtn(index)
-  }
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    const currentBtn = Nav_Buttons.find(button => pathname.startsWith(button.url))
+    if(currentBtn) {
+      setSelectedBtn(currentBtn.index)
+    }
+    
+  }, [pathname])
+
 
 
   return (
@@ -136,16 +146,17 @@ const SideBar = () => {
                   <Box
                     key={button.index} 
                     p={1}
+                    to={button.url}
+                    component={NavLink}
                     sx={{
-                      backgroundColor: `${selectedBtn === button.index ? theme.palette.primary.main : "transaprent"}`,
+                      backgroundColor: `${pathname.startsWith(button.url) ? theme.palette.primary.main : "transaprent"}`,
                       borderRadius: 1.5
                     }}
                   >
                     <IconButton
                       sx={{ 
                         width: "max-content", 
-                        color: `${(selectedBtn === button.index && theme.palette.mode === "light") ? "#000" : theme.palette.text.primary}`}}
-                      onClick={() => onClickedIcon(button.index)}
+                        color: `${(pathname.startsWith(button.url) && theme.palette.mode === "light") ? "#000" : theme.palette.text.primary}`}}
                     >
                       {button.icon}
                     </IconButton>
@@ -156,14 +167,15 @@ const SideBar = () => {
               {/* settings */}
               <Box
                 p={1}
+                to={"/settings"}
+                component={NavLink}
                 sx={{
-                  backgroundColor: `${selectedBtn === Nav_Buttons.length ? theme.palette.primary.main : "transaprent"}`,
+                  backgroundColor: `${pathname.startsWith("/settings") ? theme.palette.primary.main : "transaprent"}`,
                   borderRadius: 1.5
                 }}
               >
                 <IconButton 
-                  sx={{ width: "max-content", color: `${(selectedBtn === Nav_Buttons.length && theme.palette.mode === "light") ? "#000" : theme.palette.text.primary}`}}
-                  onClick={() => onClickedIcon(Nav_Buttons.length)}
+                  sx={{ width: "max-content", color: `${(pathname.startsWith("/settings") && theme.palette.mode === "light") ? "#000" : theme.palette.text.primary}`}}
                 >
                   <Gear />
                 </IconButton>
