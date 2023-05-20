@@ -8,6 +8,9 @@ const xss = require('xss')
 const cors = require('cors')
 
 
+const { notFound, errorHandler } = require("./middlewares/errorHandler.middleware")
+
+
 const app = express()
 
 app.use(cors({
@@ -30,6 +33,9 @@ const limiter = rateLimit({
   
 app.use("/tawk", limiter);
 app.use(mongoSanitize())
+
+app.use(notFound)
+app.use(errorHandler)
 
 
 module.exports = app
