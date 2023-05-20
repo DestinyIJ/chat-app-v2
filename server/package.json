@@ -23,6 +23,7 @@
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.2.0",
+    "otp-generator": "^4.0.1",
     "xss": "^1.0.14"
   },
   "devDependencies": {

@@ -2,6 +2,7 @@ const crypto = require("node:crypto")
 
 const asyncHandler = require("express-async-handler")
 const jwt = require("jsonwebtoken")
+const otpGenerator = require('otp-generator');
 require("dotenv").config()
 
 const User = require("../models/User.model")
@@ -10,35 +11,113 @@ const generateRefreshToken = require("../config/refreshToken.config")
 const generateToken = require("../config/jwt.config")
 
 
-exports.register = asyncHandler(async (req, res) => {
+exports.register = asyncHandler(async (req, res, next) => {
     if(Object.keys(req.body).length === 0) {
         res.statusCode(400)
         throw new Error("Request must contain body")
     }
 
-    const { email } = req.body
+    req.body = filterReqBody(req.body, "firstName", "lastName", "password", "email")
+
+    const { email, firstName, lastName, password } = req.body
     let user = await User.findOne({email})
-    if(user) throw new Error("User already exists")
+
+    if(user && user.emailVerified) {
+        res.statusCode(400)
+        throw new Error("Email provided is already registered, please Login.")
+    } else if(user) {
+        try {
+            user = await User.findOneAndUpdate(
+                { email }, 
+                { email, firstName, lastName, password }, 
+                { new: true })
+
+            req.user = user
+            next()
+        } catch (error) {
+            throw new Error(error?.message)
+        } 
+    }
+
     
     try {
-        user = await User.create({
-            ...req.body
-        })
+        user = await User.create({ email, firstName, lastName, password })
 
-        
-        res.status(200).json(user)
+        req.user = user
+        next()
     } catch (error) {
         throw new Error(error?.message)
     } 
 })
 
+exports.sendOTP = asyncHandler(async (req, res) => {
+    const { _id: userId } = req.user
+
+    const otp = otpGenerator.generate(6, 
+        { 
+            digits: true, 
+            alphabets: false, 
+            upperCase: false, 
+            specialChars: false 
+        });
+    const otp_expiry_time = Date.now() + (10 * 60 * 1000) // 10 minutes later
+
+    try {
+        const user = await User.findByIdAndUpdate(userId, {
+            otp,
+            otpExpires: otp_expiry_time
+        })
+        // send email
+        res.status(200).json({
+            status: "success",
+            message: "OTP sent to user email to complete registeration",
+            data: user
+        })
+    } catch (error) {
+        throw new Error(error?.message)
+    }
+})
+
+exports.verifyOTP = asyncHandler(async (req, res) => {
+    const { email, otp } = req.body
+    const user = await User.findOne({
+        email,
+        otpExpires: {$gt: Date.now()}
+    })
+
+    if(!user) {
+        res.statusCode(400)
+        throw new Error("Email is invalid or OTP has expired")
+    }
+
+    if(!(await user.isOTPMatched(otp))) {
+        res.statusCode(400)
+        throw new Error("OTP invalid!")
+    }
+
+    try {
+        user.emailVerified = true
+        user.otp = undefined
+
+        user = await user.save({ new: true })
+
+        res.status(200).json({
+            status: "success",
+            message: "OTP is verified",
+            data: {...user, token: generateToken(user._id)}
+        })
+    } catch (error) {
+        throw new Error(error?.message)
+    }
+})
+
 exports.login = asyncHandler(async (req, res) => {
-    if(Object.keys(req.body).length === 0) {
+    const { email, password } = req.body
+
+    if(!email || !password) {
         res.statusCode(400)
         throw new Error("Email and Password are required")
     }
-
-    const { email, password } = req.body
 
     let user = await User.findOne({ email }).select('-password')
 

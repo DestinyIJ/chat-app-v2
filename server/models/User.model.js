@@ -23,6 +23,10 @@ const userSchema = new Schema({
         unique: [true, "This user email already exist"],
         match: [emailRegex, 'Please enter a valid email address'],
     },
+    emailVerified: {
+        type: Boolean,
+        default: false
+    },
     password:{
         type:String,
         required: [true, "User password is required"],
@@ -31,7 +35,10 @@ const userSchema = new Schema({
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    otp: String,
+    otpExpires: Date
 }, {
+    validateBeforeSave: true,
     timestamps: true,
     toJSON: {
         virtuals: true
@@ -43,12 +50,17 @@ const userSchema = new Schema({
 
 userSchema.pre("save", async function (next) {
     if(this.isModified("password")) this.password = await bcrypt.hash(this.password, 10)
+    if(this.isModified("otp")) this.otp = await bcrypt.hash(this.otp, 10)
     
     next()
 })
 
 userSchema.methods.isPasswordMatched = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword, this.password)
+}
+
+userSchema.methods.isOTPMatched = async function (enteredOTP) {
+    return await bcrypt.compare(enteredOTP, this.otp)
 }
 
 userSchema.methods.createPasswordResetToken = async function () {
