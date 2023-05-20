@@ -4,15 +4,16 @@ import { Box, Divider, IconButton, Link, Stack, Typography, useTheme } from '@mu
 import { MagnifyingGlass, Plus } from 'phosphor-react'
 
 
-import { ChatElement } from '../../components'
+import { CallLogElement } from '../../components'
 import { SimpleBarStyle } from '../../components/Scrollbar'
 import { Search, SearchIconWrapper, StyledInputBase } from '../../components/search'
-import { ChatList } from '../../data'
-import CreateGroup from '../../sections/main/CreateGroup'
+import { CallLogs } from '../../data'
+import StartCall from '../../sections/main/StartCall'
 
 
 
-const Group = () => {
+
+const Call = () => {
     const theme = useTheme()
 
     const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -34,7 +35,7 @@ const Group = () => {
                 >
                     <Stack padding={3} spacing={2} maxHeight="100vh">
                         <Stack>
-                            <Typography variant="h5">Groups</Typography>
+                            <Typography variant="h5">Call Log</Typography>
                         </Stack>
 
                         <Stack sx={{ width: "100%"}}>
@@ -48,7 +49,7 @@ const Group = () => {
 
                         <Stack direction={"row"} alignItems="center" justifyContent={"space-between"}>
                             <Typography component={Link} variant="subtitle2">
-                                Create New Group
+                                Start New Conversation
                             </Typography>
                             <IconButton onClick={() => setIsDialogOpen(true)}>
                                 <Plus style={{ color: theme.palette.primary.main }} />
@@ -65,32 +66,22 @@ const Group = () => {
                                 '::-webkit-scrollbar' : { display: 'none'}
                             }}
                         >
-                            <SimpleBarStyle timeout={500} clickOnTrack={false}>
-                                <Stack>
-                                    <Typography variant="subtitle2" sx={{ color: "#676667"}}>Pinned</Typography>
-                                    {
-                                        ChatList.filter((chat) => chat.pinned).map((pinnedChat) => (
-                                            <ChatElement {...pinnedChat} key={pinnedChat.id}  />
-                                        ))
-                                    }
-                                </Stack>
-
-                                <Stack>
-                                    <Typography variant="subtitle2" sx={{ color: "#676667"}}>All</Typography>
-                                    {
-                                        ChatList.filter((chat) => !chat.pinned).map((chat) => (
-                                            <ChatElement {...chat} key={chat.id} />
-                                        ))
-                                    }
-                                </Stack>
-                            </SimpleBarStyle>
+                          <SimpleBarStyle timeout={500} clickOnTrack={false}>
+                            <Stack>
+                              {
+                                CallLogs.map((call) => (
+                                  <CallLogElement key={call.id} {...call} />
+                                ))
+                              }
+                            </Stack>
+                          </SimpleBarStyle>
                         </Stack>
                     </Stack>   
                 </Box>
             </Stack>
-            { isDialogOpen && <CreateGroup open={isDialogOpen} toggleDialog={toggleDialog} />}
+            { isDialogOpen && <StartCall open={isDialogOpen} toggleDialog={toggleDialog} />}
         </>
     )
 }
 
-export default Group
+export default Call
