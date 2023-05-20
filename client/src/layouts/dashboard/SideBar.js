@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // faker
 import { faker } from "@faker-js/faker";
@@ -24,13 +24,15 @@ import { useSettings } from "../../hooks";
 
 // data
 import { Profile_Menu } from "../../data";
-import { useLocation, NavLink } from "react-router-dom";
-import { useEffect } from "react";
-import { useCallback } from "react";
+import { useLocation, NavLink, useNavigate } from "react-router-dom";
+import { LOGIN_PATH } from "../../config";
+
+
 
 const ProfileMenu = ({ incoming }) => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
+  const navigate = useNavigate()
 
   const handleClick = (e) => {
       setMenuOpen(prev => !prev)
@@ -41,9 +43,20 @@ const ProfileMenu = ({ incoming }) => {
       setAnchorEl(null)
       setMenuOpen(false)
   }
+
   const onClickOption = (option) => {
-      console.log(option)
+      switch (option) {
+        case "signout":
+          console.log('signout')
+          navigate(LOGIN_PATH)
+          break;
+      
+        default:
+          navigate(`/${option}`)
+          break;
+      }
   } 
+
   return (
      <>
       <Avatar src={faker.image.avatar()} id='togggleMenuOpts' size={20} onClick={handleClick} />

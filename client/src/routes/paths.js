@@ -9,6 +9,10 @@ const ROOTS_DASHBOARD = "/";
 export const PATH_DASHBOARD = {
   root: ROOTS_DASHBOARD,
   general: {
-    app: path(ROOTS_DASHBOARD, "chat"),
+    chat: path(ROOTS_DASHBOARD, "chat"),
   },
+  auth : {
+    login: path("/auth/", "login"),
+    register: path("/auth/", "register")
+  }
 };

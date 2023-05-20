@@ -6,8 +6,9 @@ import DashboardLayout from "../layouts/dashboard";
 import MainLayout from "../layouts/main"
 
 // config
-import { DEFAULT_PATH } from "../config";
+import { DEFAULT_PATH, LOGIN_PATH } from "../config";
 import LoadingScreen from "../components/LoadingScreen";
+
 
 const Loadable = (Component) => (props) => {
   return (
@@ -38,6 +39,7 @@ export default function Router() {
         { path: "settings", element: <Settings /> },
         { path: "group", element: <GroupPage /> },
         { path: "call", element: <CallPage /> },
+        { path: "profile", element: <ProfilePage /> },
         { path: "404", element: <Page404 /> },
         { path: "*", element: <Navigate to="/404" replace /> },
       ],
@@ -56,6 +58,10 @@ const GroupPage = Loadable(
 
 const CallPage = Loadable(
   lazy(() => import("../pages/dashboard/Call")),
+);
+
+const ProfilePage = Loadable(
+  lazy(() => import("../pages/dashboard/Profile")),
 );
 
 const LoginPage = Loadable(
