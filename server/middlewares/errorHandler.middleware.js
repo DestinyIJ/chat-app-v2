@@ -1,7 +1,7 @@
 const errorHandler = (err, req, res, next) => {
     const statusCode = res.statusCode ? res.statusCode : 500;
     res.status(statusCode)
-    console.log(err)
+    console.log(err.stack)
     res.json({
         status: "error",
         message: err?.message,

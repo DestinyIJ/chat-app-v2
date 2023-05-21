@@ -20,7 +20,7 @@ exports.updateUserSelf = asyncHandler(async (req, res) => {
             message: "User Profile Updated",
             data : { user } })
     } catch (error) {
-        res.statusCode(500)
+        res.status(500)
         throw new Error(error)
     }
 })

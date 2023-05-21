@@ -142,10 +142,8 @@ class NodeMailerService extends MailService {
       return new Promise((resolve, reject) => {
         this.transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
-            console.log(error)
             reject(error);
           } else {
-            console.log(info)
             resolve(info);
           }
         });
@@ -252,7 +250,7 @@ class SendGridMailService extends MailService {
 // node-mailer
 const nodeMailerService = new NodeMailerService();
 // send-grid
-const sendGridMailService = new SendGridMailService();
+// const sendGridMailService = new SendGridMailService();
 
 
 const mailer = new Mailer(nodeMailerService)

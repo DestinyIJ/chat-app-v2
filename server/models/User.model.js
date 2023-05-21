@@ -33,7 +33,7 @@ const userSchema = new Schema({
     },
     passwordChangedAt: Date,
     passwordResetToken: String,
-    passwordResetExpires: Date,
+    passwordResetExpiresAt: Date,
     otp: String,
     otpExpires: Date
 }, {
@@ -50,16 +50,18 @@ const userSchema = new Schema({
 userSchema.pre("save", async function (next) {
     if(this.isModified("password")) this.password = await bcrypt.hash(this.password, 10)
     if(this.isModified("otp")) this.otp = await bcrypt.hash(this.otp, 10)
+    if(this.isModified("access_token")) this.accessTokenExpires = Date.now()
     
     next()
 })
 
 userSchema.methods.isPasswordMatched = async function (enteredPassword) {
+
     return await bcrypt.compare(enteredPassword, this.password)
 }
 
-userSchema.methods.isOTPMatched = async function (enteredOTP) {
-    return await bcrypt.compare(enteredOTP, this.otp)
+userSchema.methods.isOTPMatched = function (enteredOTP) {
+    return bcrypt.compare(enteredOTP, this.otp)
 }
 
 userSchema.methods.createPasswordResetToken = async function () {

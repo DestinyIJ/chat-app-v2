@@ -7,25 +7,23 @@ require("dotenv").config()
 
 const User = require("../models/User.model")
 const validateMongodbId = require("../utils/validateMongodbId")
-const generateRefreshToken = require("../config/refreshToken.config")
-const generateToken = require("../config/jwt.config");
+const { generateTokens, verifyAccessToken } = require("../config/jwt.config");
 const buildTemplateView = require("../utils/buildTemplateView");
 const mailer = require("../services/mailer.service");
 
 
 exports.register = asyncHandler(async (req, res, next) => {
+
     if(Object.keys(req.body).length === 0) {
-        res.statusCode(400)
+        res.status(400)
         throw new Error("Request must contain body")
     }
-
-    req.body = filterReqBody(req.body, "firstName", "lastName", "password", "email")
 
     const { email, firstName, lastName, password } = req.body
     let user = await User.findOne({email})
 
     if(user && user.emailVerified) {
-        res.statusCode(400)
+        res.status(400)
         throw new Error("Email provided is already registered, please Login.")
     } else if(user) {
         try {
@@ -39,17 +37,19 @@ exports.register = asyncHandler(async (req, res, next) => {
         } catch (error) {
             throw new Error(error?.message)
         } 
+    } else {
+        try {
+            user = await User.create({ email, firstName, lastName, password })
+    
+            req.user = user
+            next()
+        } catch (error) {
+            throw new Error(error?.message)
+        } 
     }
 
     
-    try {
-        user = await User.create({ email, firstName, lastName, password })
-
-        req.user = user
-        next()
-    } catch (error) {
-        throw new Error(error?.message)
-    } 
+    
 })
 
 exports.sendOTP = asyncHandler(async (req, res) => {
@@ -70,7 +70,7 @@ exports.sendOTP = asyncHandler(async (req, res) => {
     }, { validateModifiedOnly: true })
 
     if(!user) {
-        res.statusCode(404)
+        res.status(404)
         throw new Error("Email not found. Try registering again.")
     }
 
@@ -83,44 +83,42 @@ exports.sendOTP = asyncHandler(async (req, res) => {
     };
 
     mailer.sendMail(options).then((info) => {
-        res.status(200).json({ message: `Email sent - ${info.response}`})
+        res.status(200).json({
+            status: "success",
+            message: `OTP sent to user email to complete registeration - ${info.response}`,
+            data: user
+        })
     })
     .catch((error) => {
         console.error(`Error sending email: ${error.message}`);
         throw new Error(error)
     });
-
-    res.status(200).json({
-        status: "success",
-        message: "OTP sent to user email to complete registeration",
-        data: user
-    })
 })
 
 exports.verifyOTP = asyncHandler(async (req, res) => {
     const { email, otp } = req.body
-    const user = await User.findOne({
+    let user = await User.findOne({
         email,
         otpExpires: {$gt: Date.now()}
     })
 
-    if(!user) {
-        res.statusCode(400)
+    if(!user || !user.isOTPMatched(otp)) {
+        res.status(400)
         throw new Error("Email is invalid or OTP has expired")
     }
 
-    if(!(await user.isOTPMatched(otp))) {
-        res.statusCode(400)
-        throw new Error("OTP invalid!")
-    }
 
     try {
         user.emailVerified = true
-        user.otp = undefined
 
         user = await user.save({ new: true })
 
-        const html = buildTemplateView("email/register-complete", { user })
+
+        const html = buildTemplateView("email/register-complete", 
+            { 
+                firstName: user.firstName, 
+                lastName: user.lastName 
+            })
         const options = {
             from: process.env.APP_EMAIL_ADDRESS,
             to: user.email,
@@ -128,18 +126,10 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
             html
         };
 
-        mailer.sendMail(options).then((info) => {
-            res.status(200).json({ message: `email sent - ${info.response}`})
-        })
-        .catch((error) => {
-            console.error(`Error sending email: ${error.message}`);
-            throw new Error(error)
-        });
-
+        await mailer.sendMail(options)
         res.status(200).json({
             status: "success",
-            message: "OTP is verified",
-            data: {...user, token: generateToken(user._id)}
+            message: `OTP is verified. You can log in now with your email address`,
         })
     } catch (error) {
         throw new Error(error?.message)
@@ -150,20 +140,20 @@ exports.login = asyncHandler(async (req, res) => {
     const { email, password } = req.body
 
     if(!email || !password) {
-        res.statusCode(400)
+        res.status(400)
         throw new Error("Email and Password are required")
     }
 
-    let user = await User.findOne({ email }).select('-password')
+    let user = await User.findOne({ email }).select('+password')
 
     if(user && (await user.isPasswordMatched(password))) {
-        const refreshToken = generateRefreshToken(user._id)
+        const { refreshToken, accessToken } = await generateTokens(user)
 
-        user = await User.findByIdAndUpdate(user._id, { refreshToken }, { new: true })
+        user = await User.findByIdAndUpdate(user._id, { refreshToken, accessToken }, { new: true }).select('-password')
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            maxAge: 72 * 60 * 60 * 1000
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         })
 
         res.status(200).json({
@@ -174,27 +164,29 @@ exports.login = asyncHandler(async (req, res) => {
                 firstname: user?.firstName,
                 lastname: user?.lastName,
                 email: user?.email,
-                token: generateToken(user._id)
+                accessToken
             }
         })
     } else {
-        res.statusCode(400)
+        res.status(400)
         throw new Error("Invalid user credentials")
     } 
 })
 
 exports.updatePassword = asyncHandler(async (req, res) => {
     const { _id: id } = req.user
+    const accessToken = req.accessToken
+    
     validateMongodbId(id)
     const { password } = req.body
-
+    if(!password) { throw new Error("Password is required") }
     try {
         const user = await User.findById(id)
-        if(password) {
-            user.password = password
-            const updatedPassword = user.save()
-            res.status(200).json(updatedPassword)
-        }
+        user.password = password
+        await user.save()
+        res.status(200).json({
+            accessToken
+        })
     } catch (error) {
         throw new Error(error)
     }
@@ -207,7 +199,7 @@ exports.forgotPassword = asyncHandler(async(req, res) => {
     const user = await User.findOne({ email })
 
     if(!user) {
-        res.statusCode(404)
+        res.status(404)
         throw new Error("User not found for this email")
     }
 
@@ -226,20 +218,17 @@ exports.forgotPassword = asyncHandler(async(req, res) => {
         };
 
         mailer.sendMail(options).then((info) => {
-            res.status(200).json({ message: `Reset link has been sent - ${info.response}`})
+            res.status(200).json({
+                status: "success",
+                message: "Reset Password Link sent to email",
+                token
+            })
         })
         .catch((error) => {
-            console.error(`Error sending email: ${error.message}`);
             throw new Error(error)
         });
         
-        res.status(200).json({
-            status: "success",
-            message: "Reset Password Link sent to email",
-            data: {
-                token
-            }
-        })
+        
     } catch (error) {
         user.passwordResetToken = undefined
         user.passwordResetExpires = undefined
@@ -259,7 +248,7 @@ exports.resetPassword = asyncHandler(async(req, res) => {
      })
 
     if(!user) {
-        res.statusCode(400)
+        res.status(400)
         throw new Error("Token is invalid or has expired.")
     }
 
@@ -269,36 +258,31 @@ exports.resetPassword = asyncHandler(async(req, res) => {
         user.passwordResetExpires = undefined
 
         await user.save()
-        res.status(200).json({ 
-            status: "success",
-            message: "Password reset successful",
-            data: {...user, token: generateToken(user._id)}
-        })
 
+        const html = buildTemplateView("email/reset-password", { resetURL })
+        const options = {
+            from: process.env.APP_EMAIL_ADDRESS,
+            to: user.email,
+            subject: 'Password reset successful',
+            html
+        };
+
+        mailer.sendMail(options).then((info) => {
+            res.status(200).json({ 
+                status: "success",
+                message: "Password reset successful"
+            })
+        })
+        .catch((error) => {
+            console.error(`Error sending email: ${error.message}`);
+            throw new Error(error)
+        });
     } catch (error) {
-        res.statusCode(500)
+        res.status(500)
         throw new Error(error)
     }  
 })
 
-exports.handleRefreshToken = asyncHandler(async (req, res) => {
-    const cookie = req.cookies
-    if(!cookie?.refreshToken) throw new Error("No refresh token in cookies")
-
-    const refreshToken = cookie.refreshToken
-
-    const user = await User.findOne({ refreshToken })
-    if(!user) throw new Error("Invalid refresh token")
-    const JWT_SECRET = process.env.JWT_SECRET
-    try {
-        jwt.verify(refreshToken, JWT_SECRET)
-        const accessToken = jwt.sign(user._id)
-        res.status(200).json({ accessToken })
-    } catch (error) {
-        throw new Error(error)
-    }
-    
-})
 
 exports.logout = asyncHandler(async (req, res) => {
     const cookie = req.cookies

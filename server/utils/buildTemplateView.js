@@ -5,7 +5,7 @@ require("dotenv").config()
 const Handlebars = require('handlebars');
 
 const buildTemplateView = (view, props = {}) => {
-    const source = fs.readFileSync(path.join(`views/${view}`), 'utf8');
+    const source = fs.readFileSync(path.join(`views/${view}.html`), 'utf8');
 
     const template = Handlebars.compile(source)({
         ...props,

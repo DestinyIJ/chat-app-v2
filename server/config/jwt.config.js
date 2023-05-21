@@ -1,9 +1,34 @@
 const jwt = require("jsonwebtoken")
+const RefreshToken = require("../models/RefreshToken.model")
 
 const JWT_SECRET = process.env.JWT_SECRET
 
-const generateToken = (id) => {
-    return jwt.sign(id, JWT_SECRET, { expiresIn: "3d"})
-}
+exports.generateTokens = async (user) => {
+    const accessToken = jwt.sign({ _id:  user._id }, JWT_SECRET, { expiresIn: '30m' });
+    const refreshToken = jwt.sign({ _id:  user._id }, JWT_SECRET, { expiresIn: '7d' });
 
-module.exports = generateToken
+    const userToken = await RefreshToken.findOne({ userId: user._id });
+    if (userToken) await userToken.deleteOne({ userId: user._id });
+
+    try {
+        await RefreshToken.create({ userId: user._id, token: refreshToken })
+        return Promise.resolve({ accessToken, refreshToken });
+    } catch (error) {
+        return Promise.reject(err);
+    }
+
+};
+
+exports.verifyAccessToken = async (token) => {
+    const userToken = await RefreshToken.findOne({ token });
+
+    if(!userToken) {
+        throw new Error("Authorization Token not found")
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET)
+    const accessToken = jwt.sign({ _id:  decoded.userId }, JWT_SECRET, { expiresIn: '30m' });
+
+    return { decoded, accessToken }; 
+};
+
