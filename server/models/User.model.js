@@ -14,9 +14,8 @@ const userSchema = new Schema({
         type: String,
         required: [true, "Last Name is required"]
     },
-    avatar: {
-        type: String
-    },
+    about: String,
+    avatar: String,
     email:{
         type:String,
         required: [true, "email is required"],
@@ -66,8 +65,12 @@ userSchema.methods.isOTPMatched = async function (enteredOTP) {
 userSchema.methods.createPasswordResetToken = async function () {
     const resetToken = crypto.randomBytes(32).toString("hex")
     this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex")
-    this.passwordResetExpires = Date.now() + process.env.PASSWORD_RESET_TOKEN_EXPIRES // 10 minutes
+    this.passwordResetExpires = Date.now() + 10*60*1000 // 10 minutes
     return resetToken
+}
+
+userSchema.methods.changedPasswordAfter = async function (timestamp) {
+    return timestamp < this.passwordChangedAt
 }
 
 module.exports = model('User', userSchema);

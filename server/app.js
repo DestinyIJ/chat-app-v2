@@ -7,7 +7,7 @@ const bodyParser = require("body-parser")
 const xss = require('xss')
 const cors = require('cors')
 
-
+const routes = require("./routes")
 const { notFound, errorHandler } = require("./middlewares/errorHandler.middleware")
 
 
@@ -33,7 +33,7 @@ const limiter = rateLimit({
   
 app.use("/tawk", limiter);
 app.use(mongoSanitize())
-
+app.use(routes)
 app.use(notFound)
 app.use(errorHandler)
 

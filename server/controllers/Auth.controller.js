@@ -8,7 +8,9 @@ require("dotenv").config()
 const User = require("../models/User.model")
 const validateMongodbId = require("../utils/validateMongodbId")
 const generateRefreshToken = require("../config/refreshToken.config")
-const generateToken = require("../config/jwt.config")
+const generateToken = require("../config/jwt.config");
+const buildTemplateView = require("../utils/buildTemplateView");
+const mailer = require("../services/mailer.service");
 
 
 exports.register = asyncHandler(async (req, res, next) => {
@@ -30,7 +32,7 @@ exports.register = asyncHandler(async (req, res, next) => {
             user = await User.findOneAndUpdate(
                 { email }, 
                 { email, firstName, lastName, password }, 
-                { new: true })
+                { new: true, validateModifiedOnly: true })
 
             req.user = user
             next()
@@ -61,21 +63,38 @@ exports.sendOTP = asyncHandler(async (req, res) => {
             specialChars: false 
         });
     const otp_expiry_time = Date.now() + (10 * 60 * 1000) // 10 minutes later
+    
+    const user = await User.findByIdAndUpdate(userId, {
+        otp,
+        otpExpires: otp_expiry_time
+    }, { validateModifiedOnly: true })
 
-    try {
-        const user = await User.findByIdAndUpdate(userId, {
-            otp,
-            otpExpires: otp_expiry_time
-        })
-        // send email
-        res.status(200).json({
-            status: "success",
-            message: "OTP sent to user email to complete registeration",
-            data: user
-        })
-    } catch (error) {
-        throw new Error(error?.message)
+    if(!user) {
+        res.statusCode(404)
+        throw new Error("Email not found. Try registering again.")
     }
+
+    const html = buildTemplateView("email/send-otp", { otp })
+    const options = {
+        from: process.env.APP_EMAIL_ADDRESS,
+        to: user.email,
+        subject: 'Complete your registeration',
+        html
+    };
+
+    mailer.sendMail(options).then((info) => {
+        res.status(200).json({ message: `Email sent - ${info.response}`})
+    })
+    .catch((error) => {
+        console.error(`Error sending email: ${error.message}`);
+        throw new Error(error)
+    });
+
+    res.status(200).json({
+        status: "success",
+        message: "OTP sent to user email to complete registeration",
+        data: user
+    })
 })
 
 exports.verifyOTP = asyncHandler(async (req, res) => {
@@ -100,6 +119,22 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
         user.otp = undefined
 
         user = await user.save({ new: true })
+
+        const html = buildTemplateView("email/register-complete", { user })
+        const options = {
+            from: process.env.APP_EMAIL_ADDRESS,
+            to: user.email,
+            subject: 'Registeration Complete',
+            html
+        };
+
+        mailer.sendMail(options).then((info) => {
+            res.status(200).json({ message: `email sent - ${info.response}`})
+        })
+        .catch((error) => {
+            console.error(`Error sending email: ${error.message}`);
+            throw new Error(error)
+        });
 
         res.status(200).json({
             status: "success",
@@ -168,38 +203,47 @@ exports.updatePassword = asyncHandler(async (req, res) => {
 
 exports.forgotPassword = asyncHandler(async(req, res) => {
     const { email } = req.body
-    
+
+    const user = await User.findOne({ email })
+
+    if(!user) {
+        res.statusCode(404)
+        throw new Error("User not found for this email")
+    }
 
     try {
-        const user = await User.findOne({ email })
-
-        if(!user) {
-            res.statusCode(404)
-            throw new Error("User not found for this email")
-        }
-
         const token = await user.createPasswordResetToken()
+
         await user.save()
-        const resetURL = `${process.env.APP_FRONTEND_URL}/reset-password/${token}`
+        const resetURL = `${process.env.APP_FRONTEND_URL}/auth/reset-password?token=${token}`
+
         const html = buildTemplateView("email/forgot-password", { resetURL })
-        const option = {
+        const options = {
             from: process.env.APP_EMAIL_ADDRESS,
-            to: email,
-            subject: 'Forgot Password',
-            text: `Hello, ${user.fullname}`,
+            to: user.email,
+            subject: 'Forgot Password?',
             html
-          };
+        };
+
+        mailer.sendMail(options).then((info) => {
+            res.status(200).json({ message: `Reset link has been sent - ${info.response}`})
+        })
+        .catch((error) => {
+            console.error(`Error sending email: ${error.message}`);
+            throw new Error(error)
+        });
         
-        mailControllerUsingNodemailer(option)
-            .then((info) => {
-                res.status(200).json({ message: `Reset link sent - ${info.response}`})
-            })
-            .catch((error) => {
-                console.error(`Error sending email: ${error.message}`);
-                throw new Error(error)
-            });
-        
+        res.status(200).json({
+            status: "success",
+            message: "Reset Password Link sent to email",
+            data: {
+                token
+            }
+        })
     } catch (error) {
+        user.passwordResetToken = undefined
+        user.passwordResetExpires = undefined
+        await user.save({ validateBeforeSave: true })
         throw new Error(error)
     }
 })
@@ -208,31 +252,33 @@ exports.resetPassword = asyncHandler(async(req, res) => {
     const { token, password } = req.body
 
     const hashedToken = crypto.createHash('sha256').update(token).digest("hex")
-   
+
+    const user = await User.findOne({
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { $gt: Date.now() }
+     })
+
+    if(!user) {
+        res.statusCode(400)
+        throw new Error("Token is invalid or has expired.")
+    }
+
     try {
-        const user = await User.findOne({
-            passwordResetToken: hashedToken,
-            passwordResetExpires: { $gt: Date.now() }
-         })
-
-        if(!user) {
-            res.statusCode(400)
-            throw new Error("Token is invalid or has expired. Try requesting for another")
-        }
-
         user.password = password
         user.passwordResetToken = undefined
         user.passwordResetExpires = undefined
 
         await user.save()
-        res.status(200).json({ message: "Password reset successful"})
+        res.status(200).json({ 
+            status: "success",
+            message: "Password reset successful",
+            data: {...user, token: generateToken(user._id)}
+        })
 
     } catch (error) {
         res.statusCode(500)
         throw new Error(error)
-    }
-
-    
+    }  
 })
 
 exports.handleRefreshToken = asyncHandler(async (req, res) => {
