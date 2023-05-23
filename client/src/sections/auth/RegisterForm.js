@@ -1,29 +1,37 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import * as Yup from 'yup'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import {  useSelector, useDispatch } from 'react-redux';
 
 import { FormProvider, FormTextField } from '../../components/hook-form'
-import { Alert, Button, IconButton, InputAdornment, Link, Stack } from '@mui/material'
-import { Eye, EyeSlash } from 'phosphor-react'
+import { registerRequest, resetSuccess } from '../../redux/auth/auth.action';
+import { selectAuth } from '../../redux/auth/auth.selector';
 
-import { Link as RouterLink } from 'react-router-dom'
+import { Alert, Button, IconButton, InputAdornment, Stack } from '@mui/material'
+import { Eye, EyeSlash } from 'phosphor-react'
+import { useNavigate } from 'react-router-dom';
+
 
 
 const RegisterForm = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate()
+    const { 
+        loading:registerLoading, 
+        error:registerError, 
+        success:registerSuccess } = useSelector(selectAuth)
     const [showPassword, setShowPassword] = useState(false)
 
     const RegisterSchema = Yup.object().shape({
-        userName: Yup.string().required("User Name is required"),
         firstName: Yup.string().required("First Name is required"),
         lastName: Yup.string().required("Last Name is required"),
         email: Yup.string().required("Email is required").email("This field requires valid Email address"),
-        password: Yup.string().min("Password must be at least 6 characters long").required("Password is required")
+        password: Yup.string().min(6, "Password must be at least 6 characters long").required("Password is required")
     })
 
     const defaultValues = {
-        userName: "",
         firstName: "",
         lastName: "",
         email: "",
@@ -37,17 +45,24 @@ const RegisterForm = () => {
 
     const { reset, setError, handleSubmit, formState: { errors, isSubmitting, isSubmitSuccessful } } = methods
     
-    const onSubmit = async (submitData) => {
+    const onSubmit = async (userData) => {
         try {
-            // 
+            dispatch(registerRequest(userData)); 
         } catch(error) {
             reset()
             setError("afterSubmit", {
                 ...error,
                 message: error?.message
             })
-        }
+        } 
     }
+
+    useEffect(() => {
+        if (registerSuccess) {
+            dispatch(resetSuccess())
+            navigate('/auth/register/verify');
+        }
+    }, [registerSuccess]);
 
     return (
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
@@ -56,7 +71,6 @@ const RegisterForm = () => {
                     !!errors.afterSubmit &&
                     <Alert severity='error'>{errors.afterSubmit.message}</Alert>
                 }
-                <FormTextField name="userName" label="Username/Moniker" />
                 <Stack direction={{ xs: "column", sm:"row"}} spacing={3}>
                     <FormTextField name="firstName" label="First Name" />
                     <FormTextField name="lastName" label="Last Name" />

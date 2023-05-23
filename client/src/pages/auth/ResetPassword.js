@@ -1,10 +1,13 @@
-import { Stack, Typography, Link, Divider } from '@mui/material'
+import { Stack, Typography, Link } from '@mui/material'
 import { CaretRight } from 'phosphor-react'
 import React from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import ResetPasswordForm from '../../sections/auth/ResetPasswordForm'
 
 const ResetPassword = () => {
+  const [queryParams] = useSearchParams()
+  const token = queryParams.get("token")
+
   return (
     <>
       <Stack spacing={2} sx={{ mb: 5, position: "relative" }}>
@@ -13,7 +16,7 @@ const ResetPassword = () => {
             Please set your new password
         </Typography>
 
-        <ResetPasswordForm />
+        <ResetPasswordForm resetToken={token} />
 
         <Stack direction={"row"} justifyContent="flex-end" spacing={0.5}>
           <Link to="/auth/login" component={RouterLink} variant="subtitle2"

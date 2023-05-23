@@ -8,7 +8,7 @@ const Login = () => {
   return (
     <>
       <Stack spacing={2} sx={{ mb: 5, position: "relative" }}>
-        <Typography variant='h4'>Login to Cohoot</Typography>
+        <Typography variant='h4'>Login to Circle</Typography>
 
         <LoginForm />
 

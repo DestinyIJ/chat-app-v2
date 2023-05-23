@@ -4,6 +4,7 @@ import { useTheme } from "@mui/material/styles"
 import { Bell, CaretLeft, Image, Info, Key, Keyboard, Lock, Note, PencilCircle } from 'phosphor-react'
 import { useReducer } from 'react'
 import { Fragment } from 'react'
+import { useNavigate } from 'react-router-dom'
 import ShortcutDialog from './Shortcuts.dialog'
 import ThemeDialog from './Theme.dialog'
 
@@ -34,6 +35,8 @@ const dialogreducer = (state, action) => {
 const Settings = () => {
     const theme = useTheme()
     const [dialog, dispatchDialog] = useReducer(dialogreducer, INITIAL_DIALOG)
+
+    const navigate = useNavigate()
 
     const toggleDialog = (action) => {
         dispatchDialog({ type: action })
@@ -107,7 +110,7 @@ const Settings = () => {
             >
                 <Stack p={4} spacing={5}>
                     <Stack direction={"row"} alignItems={"center"} spacing={3}>
-                        <IconButton>
+                        <IconButton onClick={() => navigate(-1)}>
                             <CaretLeft size={24} color={"#4B4B4B"} />
                         </IconButton>
                         <Typography variant='h6'>Settings</Typography>

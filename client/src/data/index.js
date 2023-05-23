@@ -21,9 +21,9 @@ const Profile_Menu = [
     action: 'settings'
   },
   {
-    title: "Sign-out",
+    title: "Logout",
     icon: <SignOut />,
-    action: 'signout'
+    action: 'logout'
   },
 ];
 

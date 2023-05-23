@@ -3,24 +3,27 @@ import React, { useState } from 'react'
 import * as Yup from 'yup'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useDispatch } from 'react-redux';
 
 import { FormProvider, FormTextField } from '../../components/hook-form'
+import { resetPasswordRequest } from '../../redux/auth/auth.action';
+
 import { Alert, Button, IconButton, InputAdornment, Link, Stack } from '@mui/material'
 import { Eye, EyeSlash } from 'phosphor-react'
 
-import { Link as RouterLink } from 'react-router-dom'
 
 
-const ResetPasswordForm = () => {
+const ResetPasswordForm = ({ resetToken }) => {
+    const dispatch = useDispatch();
     const [showPassword, setShowPassword] = useState(false)
 
     const ResetPasswordSchema = Yup.object().shape({
-        newpassword: Yup.string().min("Password must be at least 6 characters long").required("Password is required"),
+        password: Yup.string().min(6, "Password must be at least 6 characters long").required("Password is required"),
         confirmPassword: Yup.string().required("Password is required").oneOf([Yup.ref("password"), null], "Password must match")
     })
 
     const defaultValues = {
-        newPassword: "",
+        password: "",
         confirmPassword: ""
     }
 
@@ -31,9 +34,10 @@ const ResetPasswordForm = () => {
 
     const { reset, setError, handleSubmit, formState: { errors, isSubmitting, isSubmitSuccessful } } = methods
     
-    const onSubmit = async (submitData) => {
+    const onSubmit = async (resetData) => {
+        
         try {
-            // 
+            dispatch(resetPasswordRequest({...resetData, token: resetToken }));
         } catch(error) {
             reset()
             setError("afterSubmit", {
@@ -51,7 +55,7 @@ const ResetPasswordForm = () => {
                     <Alert severity='error'>{errors.afterSubmit.message}</Alert>
                 }
                 <FormTextField 
-                    name="newPassword" label="New Password" 
+                    name="password" label="New Password" 
                     type={showPassword ? "text" : "password"} 
                     placeholder="Enter New Password" 
                     InputProps={{
@@ -94,7 +98,7 @@ const ResetPasswordForm = () => {
                         }
                     }}
                 >
-                    Reset
+                    Reset Password
                 </Button>
             </Stack>
             

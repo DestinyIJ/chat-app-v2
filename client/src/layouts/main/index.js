@@ -1,14 +1,17 @@
 import { Container, Stack } from "@mui/material";
 import React from "react";
 import { Navigate, Outlet } from "react-router-dom";
+import { useSelector, useDispatch } from 'react-redux';
 
 import Logo from "../../assets/Images/logo.ico"
 import { DEFAULT_PATH } from "../../config";
+import { selectCurrentUser } from '../../redux/auth/auth.selector';
 
-const isAuthenticated = true
 
 const MainLayout = () => {
-  if(isAuthenticated) return <Navigate to={DEFAULT_PATH} />
+  const currentUser = useSelector(selectCurrentUser)
+  console.log(process.env.BASE_API_URL)
+  if(currentUser) return <Navigate to={DEFAULT_PATH} />
 
   return (
     <>

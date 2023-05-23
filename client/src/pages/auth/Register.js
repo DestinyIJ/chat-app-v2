@@ -1,10 +1,16 @@
-import { Stack, Typography, Link, Divider } from '@mui/material'
 import React from 'react'
 import { Link as RouterLink } from 'react-router-dom'
+
+import { Stack, Typography, Link, Divider } from '@mui/material'
+
 import AuthSocial from '../../sections/auth/AuthSocial'
 import RegisterForm from '../../sections/auth/RegisterForm'
 
+
+
+
 const Register = () => {
+
   return (
     <>
       <Stack spacing={2} sx={{ mb: 5, position: "relative" }}>

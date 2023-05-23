@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch } from 'react-redux';
+import { useLocation, NavLink, useNavigate } from "react-router-dom";
 
 // faker
 import { faker } from "@faker-js/faker";
@@ -24,12 +26,14 @@ import { useSettings } from "../../hooks";
 
 // data
 import { Profile_Menu } from "../../data";
-import { useLocation, NavLink, useNavigate } from "react-router-dom";
 import { LOGIN_PATH } from "../../config";
+
+import { logoutSuccess } from '../../redux/auth/auth.action';
 
 
 
 const ProfileMenu = ({ incoming }) => {
+  const dispatch = useDispatch();
   const [menuOpen, setMenuOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState(null)
   const navigate = useNavigate()
@@ -46,8 +50,8 @@ const ProfileMenu = ({ incoming }) => {
 
   const onClickOption = (option) => {
       switch (option) {
-        case "signout":
-          console.log('signout')
+        case "logout":
+          dispatch(logoutSuccess());
           navigate(LOGIN_PATH)
           break;
       
@@ -94,19 +98,8 @@ const ProfileMenu = ({ incoming }) => {
 const SideBar = () => {
   const theme = useTheme()
   const { onToggleMode } = useSettings()
-  const [selectedBtn, setSelectedBtn] = useState(0)
 
   const { pathname } = useLocation()
-
-  useEffect(() => {
-    const currentBtn = Nav_Buttons.find(button => pathname.startsWith(button.url))
-    if(currentBtn) {
-      setSelectedBtn(currentBtn.index)
-    }
-    
-  }, [pathname])
-
-
 
   return (
     <Box

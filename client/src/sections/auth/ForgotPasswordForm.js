@@ -3,15 +3,17 @@ import React, { useState } from 'react'
 import * as Yup from 'yup'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useDispatch } from 'react-redux';
 
 import { FormProvider, FormTextField } from '../../components/hook-form'
-import { Alert, Button, IconButton, InputAdornment, Link, Stack, Typography } from '@mui/material'
-import { Eye, EyeSlash } from 'phosphor-react'
+import { forgotPasswordRequest } from '../../redux/auth/auth.action';
 
-import { Link as RouterLink } from 'react-router-dom'
+import { Alert, Button, Stack } from '@mui/material'
+
 
 
 const ForgotPasswordForm = () => {
+    const dispatch = useDispatch();
 
     const ForgotPasswordSchema = Yup.object().shape({
         email: Yup.string().required("Email is required").email("This field requires valid Email address"),
@@ -28,9 +30,10 @@ const ForgotPasswordForm = () => {
 
     const { reset, setError, handleSubmit, formState: { errors, isSubmitting, isSubmitSuccessful } } = methods
     
-    const onSubmit = async (submitData) => {
+    const onSubmit = async ({ email }) => {
+        
         try {
-            // 
+            dispatch(forgotPasswordRequest({email}));
         } catch(error) {
             reset()
             setError("afterSubmit", {
@@ -47,10 +50,7 @@ const ForgotPasswordForm = () => {
                     !!errors.afterSubmit &&
                     <Alert severity='error'>{errors.afterSubmit.message}</Alert>
                 }
-                <FormTextField 
-                    name="email" label="Email Address" 
-                    placeholder="Enter Your Registered Email Address" 
-                />
+                <FormTextField name="email" label="Email Address"/>
                
                <Button
                     fullWidth

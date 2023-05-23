@@ -3,11 +3,12 @@ import { useState } from 'react'
 import { Avatar, Box, Divider, IconButton, Link, Stack, Typography } from '@mui/material'
 import { CaretLeft } from 'phosphor-react'
 import ProfileForm from '../../sections/settings/ProfileForm'
+import { useNavigate } from 'react-router-dom'
 
 
 
 const Profile = () => {
-   
+   const navigate = useNavigate()
 
     return (
         <>
@@ -22,7 +23,7 @@ const Profile = () => {
                 >
                     <Stack padding={4} spacing={5} maxHeight="100vh">
                         <Stack direction={"row"} alignItems={"center"} spacing={3}>
-                            <IconButton>
+                            <IconButton onClick={() => navigate(-1)}>
                                 <CaretLeft size={24} color={"#4B4B4B"} />
                             </IconButton>
                             <Typography variant='h5'>Profile</Typography>
