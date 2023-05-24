@@ -31,6 +31,29 @@ const userSchema = new Schema({
         required: [true, "User password is required"],
         select: false
     },
+    socketId: String,
+    friends: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
+    friendRequests: [
+        {
+            friend: {
+                type: Schema.Types.ObjectId,
+                ref: 'User',
+            },
+            date: {
+                type: Date,
+                default: Date.now,
+            },
+        }
+    ],
+    online: {
+        type: Boolean,
+        default: false
+    },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpiresAt: Date,

@@ -6,6 +6,7 @@ import { selectSidebarType } from '../../../redux/app/app.selector';
 import appActionTypes from '../../../redux/app/app.types';
 import { useSelector } from 'react-redux';
 
+
 const Sidebar = () => {
     const sidebarType = useSelector(selectSidebarType)
     
