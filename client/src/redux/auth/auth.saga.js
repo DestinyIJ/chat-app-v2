@@ -77,7 +77,6 @@ function* logout() {
         // yield call(logoutApi);
         yield put(logoutSuccess());
     } catch(error) {
-        console.log(error)
         yield put(logoutFailure(error.message))
     }
 }

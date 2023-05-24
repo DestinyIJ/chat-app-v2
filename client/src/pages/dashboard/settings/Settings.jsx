@@ -40,7 +40,6 @@ const Settings = () => {
 
     const toggleDialog = (action) => {
         dispatchDialog({ type: action })
-        console.log(dialog)
     }
 
     const list = [

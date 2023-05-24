@@ -10,7 +10,6 @@ import { selectCurrentUser } from '../../redux/auth/auth.selector';
 
 const MainLayout = () => {
   const currentUser = useSelector(selectCurrentUser)
-  console.log(process.env.BASE_API_URL)
   if(currentUser) return <Navigate to={DEFAULT_PATH} />
 
   return (
