@@ -4,6 +4,7 @@ const rateLimit = require("express-rate-limit")
 const helmet = require("helmet")
 const mongoSanitize = require("express-mongo-sanitize")
 const bodyParser = require("body-parser")
+const cookieParser = require('cookie-parser');
 const xss = require('xss')
 const cors = require('cors')
 
@@ -23,6 +24,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 // app.use(bodyParser.json())
 // app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cookieParser());
 app.use(helmet())
 app.use(morgan("dev"))
 

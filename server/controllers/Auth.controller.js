@@ -7,7 +7,7 @@ require("dotenv").config()
 
 const User = require("../models/User.model")
 const validateMongodbId = require("../utils/validateMongodbId")
-const { generateTokens, verifyAccessToken } = require("../config/jwt.config");
+const { generateTokens, verifyToken, signToken } = require("../config/jwt.config");
 const buildTemplateView = require("../utils/buildTemplateView");
 const mailer = require("../services/mailer.service");
 
@@ -86,7 +86,7 @@ exports.sendOTP = asyncHandler(async (req, res) => {
         res.status(200).json({
             status: "success",
             message: `OTP sent to user email to complete registeration - ${info.response}`,
-            data: user
+            user
         })
     })
     .catch((error) => {
@@ -109,11 +109,12 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
 
 
     try {
-        user.emailVerified = true
 
+        user.emailVerified = true
         user = await user.save({ new: true })
 
-
+        const { accessToken } = await generateTokens(user)
+        
         const html = buildTemplateView("email/register-complete", 
             { 
                 firstName: user.firstName, 
@@ -130,6 +131,7 @@ exports.verifyOTP = asyncHandler(async (req, res) => {
         res.status(200).json({
             status: "success",
             message: `OTP is verified. You can log in now with your email address`,
+            user: {...user, accessToken }
         })
     } catch (error) {
         throw new Error(error?.message)
@@ -149,23 +151,16 @@ exports.login = asyncHandler(async (req, res) => {
     if(user && (await user.isPasswordMatched(password))) {
         const { refreshToken, accessToken } = await generateTokens(user)
 
-        user = await User.findByIdAndUpdate(user._id, { refreshToken, accessToken }, { new: true }).select('-password')
-
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
+            secure: true,
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         })
 
         res.status(200).json({
             status: "success",
             message: "Login successful",
-            data: {
-                id: user?._id,
-                firstname: user?.firstName,
-                lastname: user?.lastName,
-                email: user?.email,
-                accessToken
-            }
+            user: { ...user, accessToken }
         })
     } else {
         res.status(400)
@@ -209,6 +204,7 @@ exports.forgotPassword = asyncHandler(async(req, res) => {
         await user.save()
         const resetURL = `${process.env.APP_FRONTEND_URL}/auth/reset-password?token=${token}`
 
+     
         const html = buildTemplateView("email/forgot-password", { resetURL })
         const options = {
             from: process.env.APP_EMAIL_ADDRESS,
@@ -231,7 +227,7 @@ exports.forgotPassword = asyncHandler(async(req, res) => {
         
     } catch (error) {
         user.passwordResetToken = undefined
-        user.passwordResetExpires = undefined
+        user.passwordResetExpiresAt = undefined
         await user.save({ validateBeforeSave: true })
         throw new Error(error)
     }
@@ -242,9 +238,10 @@ exports.resetPassword = asyncHandler(async(req, res) => {
 
     const hashedToken = crypto.createHash('sha256').update(token).digest("hex")
 
+
     const user = await User.findOne({
         passwordResetToken: hashedToken,
-        passwordResetExpires: { $gt: Date.now() }
+        passwordResetExpiresAt: { $gt: Date.now() }
      })
 
     if(!user) {
@@ -255,11 +252,12 @@ exports.resetPassword = asyncHandler(async(req, res) => {
     try {
         user.password = password
         user.passwordResetToken = undefined
-        user.passwordResetExpires = undefined
+        user.passwordResetExpiresAt = undefined
+        user.passwordChangedAt = Date.now()
 
         await user.save()
 
-        const html = buildTemplateView("email/reset-password", { resetURL })
+        const html = buildTemplateView("email/reset-password")
         const options = {
             from: process.env.APP_EMAIL_ADDRESS,
             to: user.email,
@@ -283,14 +281,38 @@ exports.resetPassword = asyncHandler(async(req, res) => {
     }  
 })
 
-
-exports.logout = asyncHandler(async (req, res) => {
+exports.handleRefreshToken = asyncHandler(async (req, res) => {
     const cookie = req.cookies
     if(!cookie?.refreshToken) throw new Error("No refresh token in cookies")
+
     const refreshToken = cookie.refreshToken
 
+    const decoded = await verifyToken(refreshToken)
+
+    const user = await User.findById(decoded?.userId)
+
+    if(!user) throw new Error("Invalid refresh token")
+
+    const accessToken = await signToken(decoded)
+
+    res.status(200).json({ 
+        status : "success",
+        data: {
+            accessToken
+        }
+     })
+    
+})
+
+
+exports.logout = asyncHandler(async (req, res) => {
+    const cookies = req.cookies
+   
+    if(!cookies?.refreshToken) throw new Error("No refresh token in cookies")
+    const refreshToken = cookies.refreshToken
+
     try {
-        await User.findOneAndUpdate(refreshToken, {
+        await User.findOneAndUpdate({refreshToken}, {
             refreshToken: ""
         })
     
@@ -298,7 +320,10 @@ exports.logout = asyncHandler(async (req, res) => {
             httpOnly: true,
             secure: true
         })
-        res.sendStatus(204)
+        res.status(204).json({
+            status: "success",
+            message: "Logut successfull"
+        })
     } catch (error) {
         throw new Error(error)
     }  

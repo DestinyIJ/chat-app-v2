@@ -19,7 +19,7 @@ exports.generateTokens = async (user) => {
 
 };
 
-exports.verifyAccessToken = async (token) => {
+exports.verifyToken = async (token) => {
     const userToken = await RefreshToken.findOne({ token });
 
     if(!userToken) {
@@ -27,8 +27,13 @@ exports.verifyAccessToken = async (token) => {
     }
 
     const decoded = jwt.verify(token, JWT_SECRET)
+    
+    return decoded; 
+};
+
+exports.signToken = async (decoded) => {
     const accessToken = jwt.sign({ _id:  decoded.userId }, JWT_SECRET, { expiresIn: '30m' });
 
-    return { decoded, accessToken }; 
-};
+    return accessToken
+}
 

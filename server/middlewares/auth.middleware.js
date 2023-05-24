@@ -1,7 +1,6 @@
 const User = require("../models/User.model")
-const jwt = require("jsonwebtoken")
 const asyncHandler = require("express-async-handler")
-const { verifyAccessToken } = require("../config/jwt.config")
+const { verifyToken } = require("../config/jwt.config")
 
 
 exports.authMiddleware = asyncHandler(async (req, res, next) => {
@@ -16,9 +15,9 @@ exports.authMiddleware = asyncHandler(async (req, res, next) => {
         throw new Error("Valid authorization headers is required to perform this operation")
     }
 
-    const { decoded, accessToken } = await verifyAccessToken(token)
+    const decoded = await verifyToken(token)
 
-    const user = await User.findById(decoded?.userId, { refreshTokenExpiration: refreshTokenExpiresAt })
+    const user = await User.findById(decoded?.userId)
 
     if(!user || user.changedPasswordAfter(decoded?.iat)) {
         res.statusCode(400)
@@ -26,7 +25,7 @@ exports.authMiddleware = asyncHandler(async (req, res, next) => {
     } 
 
     req.user = user
-    req.accessToken = accessToken
+
     next()
 })
 
