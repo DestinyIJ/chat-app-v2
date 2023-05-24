@@ -14,8 +14,8 @@ import { registerUser, authenticateUser, refreshTokenApi, forgotPasswordApi, res
 function* register(action) {
     try {
       const userData = action.payload;
-      const user = yield call(registerUser, userData);
-      yield put(registerSuccess(user));
+      const responseData = yield call(registerUser, userData);
+      yield put(registerSuccess(responseData));
     } catch (error) {
       yield put(registerFailure(error.message));
     }
@@ -24,8 +24,8 @@ function* register(action) {
 function* verifyRegister(action) {
     try {
       const { otp, email } = action.payload;
-      const user = yield call(verifyRegisterOTP, { otp, email });
-      yield put(verifyRegisterSuccess(user));
+      const responseData = yield call(verifyRegisterOTP, { otp, email });
+      yield put(verifyRegisterSuccess(responseData));
     } catch (error) {
       yield put(verifyRegisterFailure(error.message));
     }
@@ -34,8 +34,8 @@ function* verifyRegister(action) {
 function* login(action) {
   try {
     const credentials = action.payload;
-    const user = yield call(authenticateUser, credentials);
-    yield put(loginSuccess(user));
+    const responseData = yield call(authenticateUser, credentials);
+    yield put(loginSuccess(responseData));
   } catch (error) {
     yield put(loginFailure(error.message));
   }
@@ -55,8 +55,8 @@ function* refreshToken() {
 function* forgotPassword(action) {
     try {
       const { email } = action.payload;
-      yield call(forgotPasswordApi, { email });
-      yield put(forgotPasswordSuccess());
+      const responseData = yield call(forgotPasswordApi, { email });
+      yield put(forgotPasswordSuccess(responseData));
     } catch (error) {
       yield put(forgotPasswordFailure(error.message));
     }
@@ -65,8 +65,8 @@ function* forgotPassword(action) {
 function* resetPassword(action) {
     try {
       const resetData = action.payload;
-      yield call(resetPasswordApi, resetData);
-      yield put(resetPasswordSuccess());
+      const responseData = yield call(resetPasswordApi, resetData);
+      yield put(resetPasswordSuccess(responseData));
     } catch (error) {
       yield put(resetPasswordFailure(error.message));
     }

@@ -11,13 +11,11 @@ import { selectAuth } from '../../redux/auth/auth.selector';
 
 import { Alert, Button, IconButton, InputAdornment, Stack } from '@mui/material'
 import { Eye, EyeSlash } from 'phosphor-react'
-import { useNavigate } from 'react-router-dom';
 
 
 
 const RegisterForm = () => {
     const dispatch = useDispatch();
-    const navigate = useNavigate()
     const { 
         loading:registerLoading, 
         error:registerError, 
@@ -57,12 +55,6 @@ const RegisterForm = () => {
         } 
     }
 
-    useEffect(() => {
-        if (registerSuccess) {
-            dispatch(resetSuccess())
-            navigate('/auth/register/verify');
-        }
-    }, [registerSuccess]);
 
     return (
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>

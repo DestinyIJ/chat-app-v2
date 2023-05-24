@@ -10,7 +10,7 @@ import MainLayout from "../layouts/main"
 import { DEFAULT_PATH, LOGIN_PATH } from "../config";
 import LoadingScreen from "../components/LoadingScreen";
 
-import { refreshTokenRequest, resetSuccess } from "../redux/auth/auth.action"
+import { refreshTokenRequest } from "../redux/auth/auth.action"
 
 
 const Loadable = (Component) => (props) => {

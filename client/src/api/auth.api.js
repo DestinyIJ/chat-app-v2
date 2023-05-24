@@ -9,8 +9,8 @@ export const registerUser = async (userData) => {
                 "Content-Type" : "application/json"
             }
         });
-        const user = response.data.user;
-        return user;
+       
+        return response.data
     } catch (error) {
         throw new Error(error);
     }
@@ -25,8 +25,8 @@ export const verifyRegisterOTP = async ({ email, otp }) => {
                 "Content-Type" : "application/json"
             }
         });
-        const user = response.data;
-        return user;
+
+        return response.data
     } catch (error) {
         throw new Error(error);
     }
@@ -41,8 +41,8 @@ export const authenticateUser = async (credentials) => {
                 "Content-Type" : "application/json"
             }
         });
-        const user = response.data.user;
-        return user;
+
+        return response.data
     } catch (error) {
         throw new Error(error);
     }
@@ -60,7 +60,7 @@ export const refreshTokenApi = async () => {
 
 export const forgotPasswordApi = async ({ email }) => {
     try {
-        await axios.post(
+        const response = await axios.post(
             '/auth/forgot-password', 
             { email }, 
             {
@@ -68,15 +68,16 @@ export const forgotPasswordApi = async ({ email }) => {
                     "Content-Type" : "application/json"
                 }
             });
+
+        return response.data
     } catch (error) {
-        console.log(error)
         throw new Error(error);
     }
 };
 
 export const resetPasswordApi = async ({ token, password }) => {
     try {
-        await axios.post(
+        const response = await axios.post(
             '/auth/reset-password', 
             { token, password }, 
             {
@@ -84,8 +85,9 @@ export const resetPasswordApi = async ({ token, password }) => {
                     "Content-Type" : "application/json"
                 }
             });
+            
+        return response.data
     } catch (error) {
-        console.log(error)
         throw new Error(error);
     }
 };
@@ -94,7 +96,6 @@ export const logoutApi = async () => {
     try {
         await axios.post('/auth/logout');
     } catch (error) {
-        console.log(error)
         throw new Error(error);
     }
 };

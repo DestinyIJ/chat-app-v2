@@ -1,5 +1,4 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { useDispatch, useSelector } from 'react-redux'
 import { persistStore } from "redux-persist"
 import createSagaMiddleware from "@redux-saga/core";
 
@@ -14,7 +13,6 @@ export const store = configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
-            thunk: false,
             serializableCheck: false,
             immutableCheck: false
         }).concat(...middlewares),
