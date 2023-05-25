@@ -26,13 +26,6 @@ const appReducer = (state = INITIAL_STATE, action) => {
                 ...INITIAL_STATE,
                 accessToken: action.payload,
             }
-        case authActionTypes.REGISTER_FAILURE:
-        case authActionTypes.VERIFY_REGISTER_FAILURE:
-        case authActionTypes.LOGIN_FAILURE:
-        case authActionTypes.FORGOT_PASSWORD_FAILURE:
-        case authActionTypes.RESET_PASSWORD_FAILURE:
-        case authActionTypes.FORGOT_PASSWORD_SUCCESS:
-        case authActionTypes.RESET_PASSWORD_SUCCESS:
         case authActionTypes.LOGOUT_SUCCESS:
             return {
                 ...INITIAL_STATE

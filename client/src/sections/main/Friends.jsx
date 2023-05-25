@@ -1,8 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {  Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Slide, Stack, Tab, Tabs } from '@mui/material'
+import { useSelector, useDispatch } from 'react-redux'
+import { selectUsers, selectFriends, selectFriendRequests } from '../../redux/user/user.selector'
+import { getFriendsRequest, getUsersRequest, getFriendRequestsRequest } from '../../redux/user/user.action'
 
 const UsersList = () => {
-    const users = []
+    const dispatch = useDispatch()
+    const users = useSelector(selectUsers)
+
+    useEffect(() => {
+        dispatch(getUsersRequest())
+    }, [dispatch])
+    
     return (
         <>
             {
@@ -15,17 +24,39 @@ const UsersList = () => {
 }
 
 const FriendsList = () => {
+    const dispatch = useDispatch()
+    const friends = useSelector(selectFriends)
+
+    useEffect(() => {
+        dispatch(getFriendsRequest())
+    }, [dispatch])
+
     return (
         <>
-            
+            {
+                friends.map(() => (
+                    <></>
+                ))
+            }
         </>
     )
 }
 
 const FriendRequestsList = () => {
+    const dispatch = useDispatch()
+    const friendRequests = useSelector(selectFriendRequests)
+
+    useEffect(() => {
+        dispatch(getFriendRequestsRequest())
+    }, [dispatch])
+
     return (
         <>
-            
+            {
+                friendRequests.map(() => (
+                    <></>
+                ))
+            }
         </>
     )
 }

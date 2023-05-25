@@ -1,117 +1,95 @@
 // saga.js
 import { put, takeLatest, call, delay, all, take } from 'redux-saga/effects';
-import authActionTypes from "./auth.types"
+import userActionTypes from "./user.types"
 import { 
-    registerSuccess, registerFailure,
-    loginSuccess, loginFailure, 
-    refreshTokenSuccess, refreshTokenFailure,
-    forgotPasswordSuccess, forgotPasswordFailure,
-    resetPasswordSuccess, resetPasswordFailure,
-    logoutSuccess, logoutFailure,
-    verifyRegisterSuccess, verifyRegisterFailure } from "./auth.action"
-import { registerUser, authenticateUser, refreshTokenApi, forgotPasswordApi, resetPasswordApi, logoutApi, verifyRegisterOTP } from "../../api/auth.api"
+  getFriendRequestsSuccess, getFriendRequestsFailure,
+  getFriendsSuccess, getFriendsFailure,
+  getUsersSuccess, getUsersFailure,
+  getUserSuccess, getUserFailure,
+  searchUsersSuccess, searchUsersFailure
+    } from "./user.action"
+import { 
+  getFriendRequests,
+  getFriends,
+  getUsers,
+  getUser,
+  searchUsers
+ } from "../../api/user.api"
 
-function* register(action) {
+function* getFriendRequests() {
     try {
-      const userData = action.payload;
-      const responseData = yield call(registerUser, userData);
-      yield put(registerSuccess(responseData));
+      const responseData = yield call(getFriendRequests);
+      yield put(getFriendRequestsSuccess(responseData));
     } catch (error) {
-      yield put(registerFailure(error.message));
+      yield put(getFriendRequestsFailure(error.message));
     }
 }
 
-function* verifyRegister(action) {
-    try {
-      const { otp, email } = action.payload;
-      const responseData = yield call(verifyRegisterOTP, { otp, email });
-      yield put(verifyRegisterSuccess(responseData));
-    } catch (error) {
-      yield put(verifyRegisterFailure(error.message));
-    }
+
+function* watchGetFriendRequests() {
+    yield takeLatest(userActionTypes.GET_FRIEND_REQUESTS_REQUEST, getFriendRequests);
 }
 
-function* login(action) {
+function* getFriends() {
   try {
-    const credentials = action.payload;
-    const responseData = yield call(authenticateUser, credentials);
-    yield put(loginSuccess(responseData));
+    const responseData = yield call(getFriends);
+    yield put(getFriendsSuccess(responseData));
   } catch (error) {
-    yield put(loginFailure(error.message));
+    yield put(getFriendsFailure(error.message));
   }
 }
 
 
-function* refreshToken() {
-    try {
-      const token = yield call(refreshTokenApi);
-      yield put(refreshTokenSuccess(token));
-    } catch (error) {
-      yield put(refreshTokenFailure(error.message));
-      yield put(logout()); // Log out the user if token refresh fails
-    }
+function* watchGetFriends() {
+  yield takeLatest(userActionTypes.GET_FRIENDS_REQUEST, getFriends);
 }
 
-function* forgotPassword(action) {
-    try {
-      const { email } = action.payload;
-      const responseData = yield call(forgotPasswordApi, { email });
-      yield put(forgotPasswordSuccess(responseData));
-    } catch (error) {
-      yield put(forgotPasswordFailure(error.message));
-    }
+
+function* getUsers() {
+  try {
+    const responseData = yield call(getUsers);
+    yield put(getUsersSuccess(responseData));
+  } catch (error) {
+    yield put(getUsersFailure(error.message));
+  }
 }
 
-function* resetPassword(action) {
-    try {
-      const resetData = action.payload;
-      const responseData = yield call(resetPasswordApi, resetData);
-      yield put(resetPasswordSuccess(responseData));
-    } catch (error) {
-      yield put(resetPasswordFailure(error.message));
-    }
+
+function* watchGetUsers() {
+  yield takeLatest(userActionTypes.GET_USERS_REQUEST, getUsers);
 }
 
-function* logout() {
-    try {
-        // yield call(logoutApi);
-        yield put(logoutSuccess());
-    } catch(error) {
-        yield put(logoutFailure(error.message))
-    }
+function* getUser(action) {
+  try {
+    const userId = action.payload;
+    const responseData = yield call(getUser, userId);
+    yield put(getUserSuccess(responseData));
+  } catch (error) {
+    yield put(getUserFailure(error.message));
+  }
 }
 
-function* watchRegister() {
-    yield takeLatest(authActionTypes.REGISTER_REQUEST, register);
+
+function* watchGetUser() {
+  yield takeLatest(userActionTypes.GET_USER_REQUEST, getUser);
 }
 
-function* watchVerifyRegister() {
-    yield takeLatest(authActionTypes.VERIFY_REGISTER_REQUEST, verifyRegister);
+function* searchUsers(action) {
+  try {
+    const searchParams = action.payload;
+    const responseData = yield call(searchUsers, searchParams);
+    yield put(searchUsersSuccess(responseData));
+  } catch (error) {
+    yield put(searchUsersFailure(error.message));
+  }
 }
 
-function* watchLogin() {
-  yield takeLatest(authActionTypes.LOGIN_REQUEST, login);
+
+function* watchSearchUsers() {
+  yield takeLatest(userActionTypes.SEARCH_USERS_REQUEST, searchUsers);
 }
 
-function* watchRefreshToken() {
-    while (true) {
-      yield take(authActionTypes.REFRESH_TOKEN_REQUEST);
-      yield delay(1000 * 60 * 30); // Delay between token refresh attempts
-      yield call(refreshToken);
-    }
-}
 
-function* watchForgotPassword() {
-    yield takeLatest(authActionTypes.FORGOT_PASSWORD_REQUEST, forgotPassword);
-}
-
-function* watchResetPassword() {
-    yield takeLatest(authActionTypes.RESET_PASSWORD_REQUEST, resetPassword);
-}
-
-function* watchLogout() {
-    yield takeLatest(authActionTypes.LOGOUT_REQUEST, logout);
-}
 
 
 

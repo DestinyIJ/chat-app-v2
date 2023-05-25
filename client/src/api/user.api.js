@@ -1,13 +1,7 @@
 
-export const getUsers = async ({ accessToken }) => {
+export const getUsers = async () => {
     try {
-        const response = await axios.get('/user',  
-            {
-                headers: {
-                    "Content-Type" : "application/json",
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
+        const response = await axios.get('/users');
 
         return response.data
     } catch (error) {
@@ -15,19 +9,10 @@ export const getUsers = async ({ accessToken }) => {
     }
 };
 
-export const searchUsers = async ({ accessToken }) => {
-    const params = {
-        firstName: 'John',
-        lastName: 'Doe',
-      };
+export const searchUsers = async (searchParams) => {
+    
     try {
-        const response = await axios.get('/user',{ params }, 
-            {
-                headers: {
-                    "Content-Type" : "application/json",
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
+        const response = await axios.get('/users/search', searchParams);
 
         return response.data
     } catch (error) {
@@ -35,15 +20,9 @@ export const searchUsers = async ({ accessToken }) => {
     }
 };
 
-export const getUser = async ({ accessToken, userId }) => {
+export const getUser = async (userId) => {
     try {
-        const response = await axios.get(`/user/${userId}`,  
-            {
-                headers: {
-                    "Content-Type" : "application/json",
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
+        const response = await axios.get(`/users/${userId}`);
 
         return response.data
     } catch (error) {
@@ -51,15 +30,9 @@ export const getUser = async ({ accessToken, userId }) => {
     }
 };
 
-export const getFriends = async ({ accessToken }) => {
+export const getFriends = async () => {
     try {
-        const response = await axios.get('/user/friends',  
-            {
-                headers: {
-                    "Content-Type" : "application/json",
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
+        const response = await axios.get('/users/friends');
 
         return response.data
     } catch (error) {
@@ -69,13 +42,7 @@ export const getFriends = async ({ accessToken }) => {
 
 export const getFriendRequests = async ({ accessToken }) => {
     try {
-        const response = await axios.get('/user/friend-requests',  
-            {
-                headers: {
-                    "Content-Type" : "application/json",
-                    Authorization: `Bearer ${accessToken}`
-                }
-            });
+        const response = await axios.get('/users/friend-requests');
 
         return response.data
     } catch (error) {

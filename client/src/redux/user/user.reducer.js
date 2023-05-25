@@ -2,14 +2,36 @@ import userActionTypes from "./user.types";
 
 const INITIAL_STATE = {
     friends: [],
-    friendRequest: [],
-    users: []
+    friendRequests: [],
+    users: [],
+    user: null
 }
 
 
-const appReducer = (state = INITIAL_STATE, action) => {
+const userReducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
-        case userActionTypes:
+        case userActionTypes.GET_FRIEND_REQUESTS_SUCCESS:
+            return {
+                ...state,
+                friendRequests: action.payload
+            }
+        case userActionTypes.GET_FRIENDS_SUCCESS:
+            return {
+                ...state,
+                friends: action.payload
+            }
+        case userActionTypes.SEARCH_USERS_SUCCESS:
+        case userActionTypes.GET_USERS_SUCCESS:
+            return {
+                ...state,
+                users: action.payload
+            }
+        case userActionTypes.GET_USER_SUCCESS:
+            return {
+                ...state,
+                user: action.payload
+            }
+        case userActionTypes.RESET:
             return {
                 ...INITIAL_STATE,
             }
@@ -18,4 +40,4 @@ const appReducer = (state = INITIAL_STATE, action) => {
     }
 }
 
-export default appReducer
+export default userReducer

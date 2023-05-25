@@ -17,41 +17,17 @@ exports.getUsers = asyncHandler(async (req, res) => {
     }
 })
 
-exports.getFriends = asyncHandler(async (req, res) => {
-    const userId = req.user._id
-    try {
-        let friends =  await User.findById(userId, 
-            { emailVerified: true })
-            .select("friends")
-            .populate("friends", "_id firstName lastName avatar");
 
-        res.status(200).json({
-            status: "success",
-            message: `Found ${friends.length} friends`,
-            friends
-        })
-    } catch (error) {
-        throw new Error(error)
-    }
-})
+exports.getUser = asyncHandler(async (req, res) => {
+    const { id } = req.params
+    validateMongodbId(id)
 
-exports.getFriendRequests = asyncHandler(async (req, res) => {
-    const userId = req.user._id
-  
     try {
-      const user = await User.findById(userId)
-            .select('friendRequests')
-            .populate('friendRequests.friend', '_id firstName lastName avatar');
-  
-      if (user) {
-        const friendRequests = user.friendRequests;
-        res.status(200).json(friendRequests);
-      } else {
-        res.status(404)
-        throw new Error("User not found")
-      }
+        let user = await User.findById(id, { emailVerified: true }).select("_id firstName lastName avatar")
+        res.status(200).json(user)
     } catch (error) {
-      throw new Error(error)
+        res.statusCode(404)
+        throw new Error("Invalid user id or user not found")
     }
 })
 
@@ -86,18 +62,96 @@ exports.searchUsers = asyncHandler(async (req, res) => {
     }
 })
 
-exports.getUser = asyncHandler(async (req, res) => {
-    const { id } = req.params
-    validateMongodbId(id)
-
+exports.getFriends = asyncHandler(async (req, res) => {
+    const userId = req.user._id
     try {
-        let user = await User.findById(id, { emailVerified: true }).select("_id firstName lastName avatar")
-        res.status(200).json(user)
+        let friends =  await User.findById(userId, 
+            { emailVerified: true })
+            .select("friends")
+            .populate("friends", "_id firstName lastName avatar");
+
+        res.status(200).json({
+            status: "success",
+            message: `Found ${friends.length} friends`,
+            friends
+        })
     } catch (error) {
-        res.statusCode(404)
-        throw new Error("Invalid user id or user not found")
+        throw new Error(error)
     }
 })
+
+
+exports.searchFriends = asyncHandler(async (req, res) => {
+    const { firstName, lastName } = req.query;
+    
+    const userId = req.user._id
+    try {
+        let friends =  await User.findById(userId, 
+            { emailVerified: true })
+            .select("friends")
+            .populate("friends", "_id firstName lastName avatar");
+
+        res.status(200).json({
+            status: "success",
+            message: `Found ${friends.length} friends`,
+            friends
+        })
+    } catch (error) {
+        throw new Error(error)
+    }
+
+    
+
+    // try {
+    //     let users;
+
+    //     if (firstName && lastName) {
+    //     users = await User.find({ firstName, lastName, emailVerified: true  }).select('_id firstName lastName avatar');
+    //     } else if (firstName) {
+    //     users = await User.find({ firstName, emailVerified: true  }).select('_id firstName lastName avatar');
+    //     } else if (lastName) {
+    //     users = await User.find({ lastName, emailVerified: true  }).select('_id firstName lastName avatar');
+    //     } else {
+    //     users = [];
+    //     }
+
+    //     if (users.length > 0) {
+    //     res.status(200).json({
+    //         status: "success",
+    //         message: `Found ${users.length} users`,
+    //         users
+    //     });
+    //     } else {
+    //         res.status(404)
+    //         throw new Error("No Users found")
+    //     }
+    // } catch (error) {
+    //     throw new Error(error)
+    // }
+})
+
+exports.getFriendRequests = asyncHandler(async (req, res) => {
+    const userId = req.user._id
+  
+    try {
+      const user = await User.findById(userId)
+            .select('friendRequests')
+            .populate('friendRequests.friend', '_id firstName lastName avatar');
+  
+      if (user) {
+        const friendRequests = user.friendRequests;
+        res.status(200).json(friendRequests);
+      } else {
+        res.status(404)
+        throw new Error("User not found")
+      }
+    } catch (error) {
+      throw new Error(error)
+    }
+})
+
+
+
 
 exports.updateUserSelf = asyncHandler(async (req, res) => {
     const { _id: id } = req.user

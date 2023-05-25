@@ -1,6 +1,7 @@
 import authActionTypes from "./auth.types"
 import apiActionTypes from "../api/api.types";
 import { useNavigate } from 'react-router-dom';
+import userActionTypes from "../user/user.types";
 
 
 // register actions
@@ -271,9 +272,15 @@ export const resetPasswordFailure = (error) => (dispatch) => {
 export const logoutRequest = () => ({
     type: authActionTypes.LOGOUT_REQUEST,
 })
-export const logoutSuccess = () => ({
-    type: authActionTypes.LOGOUT_SUCCESS,
-});
+
+export const logoutSuccess = () => (dispatch) => {
+    dispatch({
+        type: userActionTypes.RESET
+    })
+    dispatch({
+        type: authActionTypes.LOGOUT_SUCCESS,
+    })
+};
 export const logoutFailure = () => ({
     type: apiActionTypes.API_FAILURE,
 })

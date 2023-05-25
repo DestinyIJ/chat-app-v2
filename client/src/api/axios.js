@@ -25,7 +25,7 @@ axiosInstance.interceptors.request.use(
     
         // Add the bearer token to the Authorization header
         if (bearerToken) {
-        config.headers['Authorization'] = `Bearer ${bearerToken}`;
+            config.headers['Authorization'] = `Bearer ${bearerToken}`;
         }
     
         return config;

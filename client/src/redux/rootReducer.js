@@ -6,6 +6,7 @@ import storage from "redux-persist/lib/storage"
 import appReducer from "./app/app.reducer"
 import authReducer from "./auth/auth.reducer"
 import apiReducer from "./api/api.reducer"
+import userReducer from "./user/user.reducer"
 
 const persistConfig = {
     key: 'root',
@@ -18,7 +19,8 @@ const persistConfig = {
 const rootReducer = combineReducers ({
    app: appReducer,
    auth: authReducer,
-   api: apiReducer
+   api: apiReducer,
+   user: userReducer
 })
 
 export default persistReducer(persistConfig, rootReducer)
