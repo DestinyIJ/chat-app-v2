@@ -44,6 +44,16 @@ const userSchema = new Schema({
                 type: Schema.Types.ObjectId,
                 ref: 'User',
             },
+            status: {
+                type: String,
+                default: "pending",
+                enum: ["pending", "accepted", "declined"]
+            },
+            type: {
+                type: String,
+                default: "incoming",
+                enum: ["incoming","outgoing"]
+            },
             date: {
                 type: Date,
                 default: Date.now,

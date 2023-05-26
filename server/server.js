@@ -33,27 +33,97 @@ io.on("connection", async (socket) => {
 
     console.log(`User connected - ${socketId}`)
 
-    if(userId) {
-        await User.findByIdAndUpdate(userId, { 
-            socketId,
-            online: true 
-        })
-    }
-
-    socket.on("friend_request", async (data) => {
+    if(Boolean(userId)) {
         try {
-            await User.findOneAndUpdate(
-                { _id: userId },
-                { $push: { friendRequests: { friend: to._id } } },
-                { new: true }
-            );
-            const to = await User.findById(data.to)
-            io.to(to.socket_id).emit("new_friend_request", { from: userId })
+            await User.findByIdAndUpdate(userId, { 
+                socketId,
+                online: true 
+            })
         } catch (error) {
             io.emit("error", error)
         }
+    }
 
-       
+    socket.on("friend_request", async (from) => {
+        try {
+            const recipient = await User.findOneAndUpdate(
+                { _id: userId },
+                { $push: { friendRequests: { friend: from, type: "incoming" } } },
+                { new: true, validateModifiedOnly: true }
+            );
+
+            const sender = await User.findOneAndUpdate(
+                { _id: recipient._id },
+                { $push: { friendRequests: { friend: recipient._id, type: "outgoing" } } },
+                { new: true, validateModifiedOnly: true }
+            );
+            
+            if(!recipient || !sender) {
+                throw new error("Could not complete friend request")
+            }
+
+            io.to(recipient.socket_id).emit("new_friend_request", { 
+                from: sender._id,
+                message: `New Friend Request from ${sender.firstName} ${sender.lastName}`
+            })
+            io.to(sender.socket_id).emit("friend_request_sent", { 
+                message: `Friend Request sent to ${recipient.firstName} ${recipient.lastName}`
+            })
+
+        } catch (error) {
+            io.emit("error", error)
+        }
+    })
+
+    socket.on("accept_friend_request", async (from) => {
+        try {
+            const recipient = await User.findOneAndUpdate(
+                { _id: userId },
+                { $push: { friends: from } },
+                { $del: { friendRequests: { friend: from, type: "incoming" } } },
+                { new: true, validateModifiedOnly: true }
+            );
+
+            const sender = await User.findOneAndUpdate(
+                { _id: from },
+                { $push: { friends: to_user.id } },
+                { $del: { friendRequests: { friend: to_user.id } } },
+                { new: true, validateModifiedOnly: true }
+            );
+
+            io.to(recipient.socket_id).emit("friend_request_accepted", { 
+                message: `You have accepted a friend Request from ${sender.firstName} ${sender.lastName}`
+            })
+            io.to(sender.socket_id).emit("friend_request_accepted", { 
+                message: `Your friend Request to ${recipient.firstName} ${recipient.lastName} has been accepted`
+            })
+        } catch (error) {
+            io.emit("error", error)
+        }
+    })
+
+    socket.on("decline_friend_request", async (from) => {
+        try {
+            await User.findOneAndUpdate(
+                { _id: userId },
+                { $push: { friends: from } },
+                { $del: { friendRequests: { friend: from, type: "incoming" } } },
+                { new: true, validateModifiedOnly: true }
+            );
+
+            await User.findOneAndUpdate(
+                { _id: from },
+                { $del: { friendRequests: { friend: userId } } },
+                { new: true, validateModifiedOnly: true }
+            );
+        } catch (error) {
+            io.emit("error", error)
+        }
+    })
+
+    socket.on("end", function () {
+        console.log("Closing connection")
+        socket.disconnect(0)
     })
 });
 

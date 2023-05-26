@@ -65,16 +65,24 @@ exports.searchUsers = asyncHandler(async (req, res) => {
 exports.getFriends = asyncHandler(async (req, res) => {
     const userId = req.user._id
     try {
-        let friends =  await User.findById(userId, 
+        const user =  await User.findById(userId, 
             { emailVerified: true })
             .select("friends")
             .populate("friends", "_id firstName lastName avatar");
 
-        res.status(200).json({
-            status: "success",
-            message: `Found ${friends.length} friends`,
-            friends
-        })
+        if (user) {
+            const friends = user.friends;
+    
+            res.status(200).json({
+                status: "success",
+                message: `Found ${friends.length} friends`,
+                friends
+            })
+        } else {
+            res.status(404)
+            throw new Error("User not found")
+        }
+        
     } catch (error) {
         throw new Error(error)
     }
@@ -83,19 +91,26 @@ exports.getFriends = asyncHandler(async (req, res) => {
 
 exports.searchFriends = asyncHandler(async (req, res) => {
     const { firstName, lastName } = req.query;
-    
+
     const userId = req.user._id
     try {
-        let friends =  await User.findById(userId, 
+        const user =  await User.findById(userId, 
             { emailVerified: true })
             .select("friends")
             .populate("friends", "_id firstName lastName avatar");
 
-        res.status(200).json({
-            status: "success",
-            message: `Found ${friends.length} friends`,
-            friends
-        })
+        if (user) {
+            const friends = user.friends;
+    
+            res.status(200).json({
+                status: "success",
+                message: `Found ${friends.length} friends`,
+                friends
+            })
+        } else {
+            res.status(404)
+            throw new Error("User not found")
+        }
     } catch (error) {
         throw new Error(error)
     }
@@ -140,7 +155,12 @@ exports.getFriendRequests = asyncHandler(async (req, res) => {
   
       if (user) {
         const friendRequests = user.friendRequests;
-        res.status(200).json(friendRequests);
+
+        res.status(200).json({
+            status: "success",
+            message: `Found ${friendRequests.length} friend requests`,
+            friendRequests
+        })
       } else {
         res.status(404)
         throw new Error("User not found")
