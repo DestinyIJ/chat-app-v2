@@ -25,11 +25,6 @@ function* getFriendRequests() {
     }
 }
 
-
-function* watchGetFriendRequests() {
-    yield takeLatest(userActionTypes.GET_FRIEND_REQUESTS_REQUEST, getFriendRequests);
-}
-
 function* getFriends() {
   try {
     const responseData = yield call(getFriends);
@@ -37,11 +32,6 @@ function* getFriends() {
   } catch (error) {
     yield put(getFriendsFailure(error.message));
   }
-}
-
-
-function* watchGetFriends() {
-  yield takeLatest(userActionTypes.GET_FRIENDS_REQUEST, getFriends);
 }
 
 
@@ -55,10 +45,6 @@ function* getUsers() {
 }
 
 
-function* watchGetUsers() {
-  yield takeLatest(userActionTypes.GET_USERS_REQUEST, getUsers);
-}
-
 function* getUser(action) {
   try {
     const userId = action.payload;
@@ -70,10 +56,6 @@ function* getUser(action) {
 }
 
 
-function* watchGetUser() {
-  yield takeLatest(userActionTypes.GET_USER_REQUEST, getUser);
-}
-
 function* searchUsers(action) {
   try {
     const searchParams = action.payload;
@@ -84,6 +66,23 @@ function* searchUsers(action) {
   }
 }
 
+function* watchGetFriendRequests() {
+  yield takeLatest(userActionTypes.GET_FRIEND_REQUESTS_REQUEST, getFriendRequests);
+}
+
+function* watchGetFriends() {
+  yield takeLatest(userActionTypes.GET_FRIENDS_REQUEST, getFriends);
+}
+
+
+function* watchGetUsers() {
+  yield takeLatest(userActionTypes.GET_USERS_REQUEST, getUsers);
+}
+
+function* watchGetUser() {
+  yield takeLatest(userActionTypes.GET_USER_REQUEST, getUser);
+}
+
 
 function* watchSearchUsers() {
   yield takeLatest(userActionTypes.SEARCH_USERS_REQUEST, searchUsers);
@@ -92,17 +91,12 @@ function* watchSearchUsers() {
 
 
 
-
-
-
-export default function* authSaga() {
+export default function* userSaga() {
     yield all([
-        call(watchLogin), 
-        call(watchRefreshToken), 
-        call(watchRegister),
-        call(watchVerifyRegister),
-        call(watchForgotPassword),
-        call(watchResetPassword),
-        call(watchLogout)
+        call(watchGetFriendRequests), 
+        call(watchGetFriends), 
+        call(watchGetUsers),
+        call(watchGetUser),
+        call(watchSearchUsers)
     ]);
 }

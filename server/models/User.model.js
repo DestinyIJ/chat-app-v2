@@ -38,6 +38,12 @@ const userSchema = new Schema({
             ref: "User"
         }
     ],
+    conversations: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Conversation"
+        }
+    ],
     friendRequests: [
         {
             friend: {
@@ -89,7 +95,6 @@ userSchema.pre("save", async function (next) {
 })
 
 userSchema.methods.isPasswordMatched = async function (enteredPassword) {
-
     return await bcrypt.compare(enteredPassword, this.password)
 }
 

@@ -1,16 +1,22 @@
 import { Box, Stack, Typography, Avatar, Badge } from "@mui/material";
 import { useTheme } from "@mui/material/styles"
+import { useSelector, useDispatch } from 'react-redux'
+
 import StyledBadge from "./StyledBadge";
 
 
 const ChatElement = ({id, img, name, msg, time, unread, online,}) => {
     const theme = useTheme()
+    const dispatch = useDispatch()
 
     return (
         <Box key={id} sx={{ 
             width: "100%", borderRadius: 1, 
             backgroundColor: theme.palette.mode === "light" ? "#fff" : theme.palette.background.default, 
             cursor: "pointer"}} p={2}
+            onClick={() => {
+
+            }}
         >
             <Stack direction="row" alignItems="center" justifyContent="space-between">
                 <Stack direction="row" spacing={2}>

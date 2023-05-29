@@ -7,6 +7,7 @@ import appReducer from "./app/app.reducer"
 import authReducer from "./auth/auth.reducer"
 import apiReducer from "./api/api.reducer"
 import userReducer from "./user/user.reducer"
+import chatReducer from "./chat/chat.reducer"
 
 const persistConfig = {
     key: 'root',
@@ -20,7 +21,8 @@ const rootReducer = combineReducers ({
    app: appReducer,
    auth: authReducer,
    api: apiReducer,
-   user: userReducer
+   user: userReducer,
+   chat: chatReducer
 })
 
 export default persistReducer(persistConfig, rootReducer)

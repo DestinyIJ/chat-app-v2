@@ -9,8 +9,8 @@ import { ChatElement } from "../../components";
 import { Search, SearchIconWrapper, StyledInputBase } from "../../components/search";
 import { ChatList } from "../../data";
 import Friends from "../../sections/main/Friends";
-
-
+import { useEffect } from "react";
+import { socket } from "../../utils/socket";
 
 
 const Chats = () => {
@@ -19,6 +19,13 @@ const Chats = () => {
     const toggleDialog = () => {
         setOpenDialog(prev => !prev)
     }
+
+    useEffect(() => {
+        if(!socket) return
+        socket.emit("get_conversations", (conversations) => {
+
+        })
+    }, [])
     return (
         <>
             <Box

@@ -18,24 +18,26 @@ const DashboardLayout = () => {
   const currentUser = useSelector(selectCurrentUser)
 
 
-  if(!currentUser) return <Navigate to={LOGIN_PATH} />
-
-  const user_id = currentUser._id
   useEffect(() => {
     if(!currentUser) return
-    window.onload = function () {
-      if(!window.location.hash) {
-        window.location = window.location + "#loaded"
-        window.location.reload()
-      }
-    }
+    
+    const user_id = currentUser._id
 
-    window.reload()
+    // window.onload = function () {
+    //   if(!window.location.hash) {
+    //     window.location = window.location + "#loaded"
+    //     window.location.reload()
+    //   }
+      
+    // }
+
+  
+
     if(!socket) {
       connectSocket(user_id)
     }
 
-    socket.on("new_friend_request", ({ from, message }) => {
+    socket.on("friend_request", ({ from, message }) => {
       dispatch(apiSuccess(message))
     })
 
@@ -48,7 +50,7 @@ const DashboardLayout = () => {
     })
 
     socket.on("error", (error) => {
-      dispatch(apiFailure(error.message))
+      dispatch(apiFailure(error))
     })
 
     return () => {
@@ -58,6 +60,8 @@ const DashboardLayout = () => {
       socket.off("error")
     }
   }, [currentUser, socket])
+
+  if(!currentUser) return <Navigate to={LOGIN_PATH} />
 
   return (
     <Stack direction="row" sx={{ width: "100%", height: "100%"}}>

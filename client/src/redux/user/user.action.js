@@ -21,7 +21,7 @@ export const getFriendRequestsRequest = () => (dispatch) => {
 export const getFriendRequestsSuccess = (data) => (dispatch) => {
     dispatch({
         type: userActionTypes.GET_FRIEND_REQUESTS_SUCCESS,
-        payload: data.friend,
+        payload: data.friendRequests,
     })
     dispatch({
         type: apiActionTypes.API_SUCCESS,
@@ -70,7 +70,7 @@ export const getFriendsRequest = () => (dispatch) => {
 export const getFriendsSuccess = (data) => (dispatch) => {
     dispatch({
         type: userActionTypes.GET_FRIENDS_SUCCESS,
-        payload: data.user,
+        payload: data.friends,
     })
     dispatch({
         type: apiActionTypes.API_SUCCESS,
@@ -219,7 +219,7 @@ export const searchUsersRequest = (searchData) => (dispatch) => {
 export const searchUsersSuccess = (data) => (dispatch) => {
     dispatch({
         type: userActionTypes.SEARCH_USERS_SUCCESS,
-        payload: data.user,
+        payload: data.users,
     })
     dispatch({
         type: apiActionTypes.API_SUCCESS,

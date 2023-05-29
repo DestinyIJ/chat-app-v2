@@ -40,7 +40,7 @@ export const getFriends = async () => {
     }
 };
 
-export const getFriendRequests = async ({ accessToken }) => {
+export const getFriendRequests = async () => {
     try {
         const response = await axios.get('/users/friend-requests');
 

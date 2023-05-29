@@ -12,6 +12,19 @@ const buildTemplateView = require("../utils/buildTemplateView");
 const mailer = require("../services/mailer.service");
 
 
+// const authService = require('../services/authService');
+
+// // Registration logic
+// exports.register = async (req, res) => {
+//   try {
+//     const { username, password } = req.body;
+//     const newUser = await authService.register(username, password);
+//     res.status(201).json(newUser);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 exports.register = asyncHandler(async (req, res, next) => {
 
     if(Object.keys(req.body).length === 0) {
@@ -153,14 +166,16 @@ exports.login = asyncHandler(async (req, res) => {
 
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: true,
+            // secure: true,
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         })
+
 
         res.status(200).json({
             status: "success",
             message: "Login successful",
-            user: { ...user, accessToken }
+            accessToken,
+            user
         })
     } else {
         res.status(400)

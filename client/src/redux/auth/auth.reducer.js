@@ -18,7 +18,7 @@ const appReducer = (state = INITIAL_STATE, action) => {
         case authActionTypes.LOGIN_SUCCESS:
             return {
                 ...INITIAL_STATE,
-                currentUser: action.payload,
+                currentUser: action.payload.user,
                 accessToken: action.payload.accessToken,
             }
         case authActionTypes.REFRESH_TOKEN_SUCCESS:

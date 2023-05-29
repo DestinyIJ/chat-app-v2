@@ -23,7 +23,7 @@ export const verifyRegisterOTP = async ({ email, otp }) => {
 export const authenticateUser = async (credentials) => {
     try {
         const response = await axios.post('/auth/login', {...credentials});
-
+        console.log(response.data)
         return response.data
     } catch (error) {
         throw new Error(error);

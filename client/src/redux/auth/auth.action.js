@@ -125,7 +125,7 @@ export const loginRequest = (credentials) => (dispatch) => {
 export const loginSuccess = (data) => (dispatch) => {
     dispatch({
         type: authActionTypes.LOGIN_SUCCESS,
-        payload: data.user,
+        payload: data,
     })
     dispatch({
         type: apiActionTypes.API_SUCCESS,
